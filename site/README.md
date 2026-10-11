@@ -25,3 +25,5 @@ The **capacity explorer is arithmetic only** (parameter count × storage bytes/p
 ## Security
 
 No secrets or user files are uploaded. GitHub Pages is static. The only runtime network request to data is for the public static benchmark JSON published with the site. Google Fonts are optional decorative resources, with local fallback fonts.
+
+The **Local CUDA receipt viewer** under Evidence parses a user-selected V1 receipt entirely in-browser; nothing is sent to a server, stored remotely or published. It labels file-provided numbers explicitly. See [local device-validation instructions](../docs/DEVICE_VALIDATION.md).

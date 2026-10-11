@@ -6,6 +6,13 @@ Original, model-format-constrained and offline. We prove decoder block parity be
 
 ## Gate A: correctness (before adding real model support)
 
+**v0.2 validation-kit candidate:** `doctor --device cuda`, `validate-device`,
+a Windows PowerShell script, and a local-only browser JSON receipt viewer are
+available for testing. CPU CI validates the receipt contract; **no Nvidia
+hardware test has been recorded yet**. These are not completed CUDA parity
+checks until a user produces a verified receipt. See
+[local device validation](DEVICE_VALIDATION.md).
+
 - [x] Deterministic synthetic transformer checkpoint creation
 - [x] File-mapped tensor storage, checksummed manifest
 - [x] RoPE, RMSNorm, grouped-query attention, SwiGLU, per-layer KV cache

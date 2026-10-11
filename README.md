@@ -63,3 +63,17 @@ License: MIT for the PhiStream code. Model checkpoints have their **own** licens
 ## Initial verification evidence (not a speed claim)
 
 On the build environment's **CPU only** run (October 10, 2026 Pacific), the generated 39-tensor fixture passed SHA-256 verification. Streaming and resident modes had a maximum absolute logit difference of **0.0** across four input tokens. Re-run locally because tiny synthetic models do not benchmark disk/PCIe transfer constraints for real models.
+
+## Local RTX validation candidate (not yet a verified CUDA result)
+
+Use `python -m phistream.cli doctor --device cuda` to explicitly check CUDA.
+The new `validate-device` command verifies the synthetic fixture and produces
+a `PHISTREAM_DEVICE_VALIDATION_V1` JSON receipt with parity and streamed /
+pinned / resident measurements. Windows users can run
+`./scripts/validate-rtx.ps1 -Device cuda` from PowerShell after installing the
+appropriate official CUDA-enabled PyTorch. No auto-downloads or upload.
+
+See [docs/DEVICE_VALIDATION.md](docs/DEVICE_VALIDATION.md) for limitations.
+The [live research dashboard](https://michaelwave369.github.io/PhiStream/)
+can read a local JSON CUDA receipt in-browser. It does not submit it to a
+server or present uploaded, user-provided results as independently verified.
