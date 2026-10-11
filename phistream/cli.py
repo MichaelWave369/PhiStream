@@ -114,6 +114,25 @@ def main() -> None:
                      help="Opt-in memory policy guard before execution (not a fit guarantee)")
     run.add_argument("--reserve-mib", type=float, default=512.0,
                      help="Safety reserve, used only with --capacity-mib")
+    hardware = sp.add_parser("hardware-snapshot",
+        help="Read-only local RAM, optional CUDA and selected drive free-space counters")
+    hardware.add_argument("--gpu", choices=["none", "cuda"], default="none")
+    hardware.add_argument("--drive", action="append", default=[],
+                          help="Explicit path to measure free/total bytes; repeat up to 8 times")
+    hardware.add_argument("--output", help="Write a new local JSON receipt, never overwrite")
+    advisor = sp.add_parser("recommend-residency",
+        help="Review-only model-layer residency advice from live RAM/CUDA counters")
+    advisor.add_argument("location", help="Explicit local compatible Llama safetensors checkpoint")
+    advisor.add_argument("--context-tokens", type=int, required=True)
+    advisor.add_argument("--gpu-reserve-mib", type=float, default=1024.0)
+    advisor.add_argument("--ram-reserve-mib", type=float, default=4096.0)
+    advisor.add_argument("--max-tensor-mib", type=int, default=512)
+    advisor.add_argument("--head-rows", type=int, default=128)
+    advisor.add_argument("--drive", action="append", default=[],
+                         help="Optional explicit storage directory for capacity report")
+    advisor.add_argument("--output", help="Write new local JSON recommendation, never overwrite")
+    advisor.add_argument("--strict", action="store_true",
+                         help="Exit 2 for a policy-blocked advisory (never permits execution)")
     args = ap.parse_args()
     if args.command == "init-fixture":
         build_fixture(args.directory, ModelConfig(), args.seed)
@@ -214,6 +233,34 @@ def main() -> None:
                 out.write(payload)
         print(payload, end="")
         if args.strict and report["status"] == "BLOCKED_BY_POLICY":
+            raise SystemExit(2)
+        return
+    if args.command in ("hardware-snapshot", "recommend-residency"):
+        from pathlib import Path
+        from .hardware import hardware_snapshot
+        if args.command == "hardware-snapshot":
+            receipt = hardware_snapshot(gpu=args.gpu, drives=tuple(args.drive))
+        else:
+            from .safeweights import LocalCheckpoint
+            from .advisor import recommend_residency
+            observation = hardware_snapshot(gpu="cuda", drives=tuple(args.drive))
+            receipt = recommend_residency(
+                LocalCheckpoint(args.location),
+                observation, context_tokens=args.context_tokens,
+                gpu_reserve_mib=args.gpu_reserve_mib,
+                ram_reserve_mib=args.ram_reserve_mib,
+                max_tensor_mib=args.max_tensor_mib,
+                head_rows=args.head_rows,
+            )
+        content = json.dumps(receipt, indent=2, allow_nan=False) + "\n"
+        if args.output:
+            target = Path(args.output)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            with target.open("x", encoding="utf-8") as out:
+                out.write(content)
+        print(content, end="")
+        if (args.command == "recommend-residency" and args.strict
+                and receipt["status"] == "BLOCKED_BY_POLICY"):
             raise SystemExit(2)
         return
     store = ModelStore(args.directory)

@@ -143,3 +143,19 @@ With `--device cuda`, the policy is also capped by observed free GPU
 bytes. `run-llama-ids` optionally accepts `--capacity-mib` to block
 oversized policy scenarios before weight execution (not a hard OOM guard).
 See [memory preflight documentation](docs/MEMORY_PREFLIGHT.md).
+
+## Local hardware observation and memory advisor (PR #8 experimental)
+
+The new `hardware-snapshot` command queries actual Windows/Linux available
+RAM, optional CUDA free VRAM, and free space on explicitly selected drives.
+The separate `recommend-residency` command estimates a possible Llama
+layer-placement policy for **human review** from fresh observed free memory.
+Neither command runs a model, changes layer residency, downloads weights,
+measures disk speed, or guarantees a GPU fit. No execution is approved.
+
+```powershell
+py -m phistream.cli hardware-snapshot --gpu cuda --drive "C:\" --drive "D:\" --output benchmarks\local\hardware-rtx.json
+```
+
+See the [Hardware-Aware Advisor](docs/HARDWARE_ADVISOR.md) for optional
+checkpoint-based recommendations and provenance rules.

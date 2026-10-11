@@ -54,6 +54,13 @@ model comparison has been run yet. See [reference protocol](REFERENCE_TRACE.md).
 
 ## Gate C: measured performance (beat baseline **or do not claim victory**)
 
+**PR #8 advisory candidate:** fresh host RAM + optional CUDA free-memory
+snapshots feed a *read-only*, checkpoint-bound layer-placement **proposal**.
+Neither drive speed nor persistent Llama GPU-cache placement has been
+implemented, and the proposal never authorizes execution. See
+[hardware advisor](HARDWARE_ADVISOR.md).
+
+
 **Memory guard candidate:** `plan-memory` reports `BLOCKED_BY_POLICY` or
 `REVIEW_REQUIRED` with `no_fit_guarantee=true`. An optional
 `run-llama-ids --capacity-mib` guard refuses budget-blocked execution
@@ -63,6 +70,7 @@ GPU results have been measured. See [memory preflight](MEMORY_PREFLIGHT.md).
 
 - [x] Metadata-derived memory policy preflight for active FP32 layer, context KV, workspace and output projection, labeled scenario or observed CUDA free-memory (not a hard VRAM cap)
 - [ ] GPU dynamic budget with measured allocator margin, adaptive layer residency and actual OOM recovery
+- [x] Read-only Windows/Linux RAM, opt-in CUDA free VRAM and explicit drive capacity snapshots with metadata-derived, **unapproved** pinned-layer advice (not applied by current executor)
 - [ ] Async staging and prefetch with synchronization correctness tests
 - [ ] Pinned-memory and direct disk-read profiling (OS-dependent)
 - [ ] Residency policy tuned against trace, not speculative NBG claims
