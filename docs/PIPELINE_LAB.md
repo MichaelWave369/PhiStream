@@ -92,3 +92,30 @@ new timing fields may simply be absent from them.
 No GPU performance claim follows from CI. The real RTX 5070 path must be
 retested with a new receipt to identify whether explicit synchronization
 or some other interpreter/runtime gap explains the ~2 ms remainder.
+
+## Host-buffer lifetime fairness (next RTX verification)
+
+The first measured RTX 5070 attribution receipt reported pinned
+`unattributed_wall_time` ~1.889 ms versus pageable ~0.006 ms while
+`pre_h2d_sync` was ~0.060 ms for both modes. Inspection showed that
+the pinned code was overwriting its temporary pageable tensor reference
+*before* the full timer stopped. On CPython this can immediately free
+that tensor's backing bytearray, whereas the pageable path retained it
+through timing. This is a **measurement bias hypothesis**, not proof
+that Python reclamation explains all timing differences.
+
+Both new CUDA methods now:
+- Keep the temporary pageable tensor alive for the **entire** synchronized
+  read/stage/H2D wall-clock interval.
+- Release local tensor references only **after** the full interval ends.
+- Record `source_release_after_timing` separately in each method; this
+  is a time diagnostic, **not GPU bandwidth**.
+- Identify the new method explicitly in
+  `trial_design.host_tensor_lifetime` so unlike old receipts they are
+  auditable. Both use the same fixture, size, and paired warmups.
+
+**Do not compare pre-fix absolute full-pipeline timing with post-fix numbers
+as if they were runs of an identical implementation.** The change corrects
+asymmetric tensor lifetime accounting. It does not prove pinned staging
+is beneficial until a fresh repeated RTX test says so. Older V1 JSONs
+remain readable in the web viewer, with diagnostics absent where not recorded.

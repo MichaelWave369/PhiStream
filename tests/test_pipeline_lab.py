@@ -60,15 +60,18 @@ class PipelineLabTests(unittest.TestCase):
         # end-to-end path. Any remaining time must be explicitly disclosed.
         trials = [
             {"total": .015, "read": .005, "prepare": .003,
-             "pinned_stage": .002, "pre_h2d_sync": .003, "h2d": .001},
+             "pinned_stage": .002, "pre_h2d_sync": .003, "h2d": .001,
+             "source_release_after_timing": .002},
             {"total": .018, "read": .005, "prepare": .004,
-             "pinned_stage": .003, "pre_h2d_sync": .004, "h2d": .001},
+             "pinned_stage": .003, "pre_h2d_sync": .004, "h2d": .001,
+             "source_release_after_timing": .003},
         ]
         result = _aggregate(trials, 1048576, True)
         self.assertEqual(result["unattributed_wall_time"]["samples_seconds"],
                          [.001, .001])
         self.assertAlmostEqual(result["pre_h2d_sync"]["median_seconds"], .0035)
         self.assertAlmostEqual(result["unattributed_wall_time"]["median_seconds"], .001)
+        self.assertAlmostEqual(result["source_release_after_timing"]["median_seconds"], .0025)
 
     def test_nonnegative_time_accounting_allows_zero_and_rejects_nan(self):
         self.assertEqual(_duration_stats([0., .1, 0.])["median_seconds"], 0.)
@@ -83,6 +86,64 @@ class PipelineLabTests(unittest.TestCase):
             m = receipt["methods"][mode]["measurements"]
             self.assertEqual(len(m["unattributed_wall_time"]["samples_seconds"]), 4)
             self.assertNotIn("pre_h2d_sync", m)
+
+    def test_cuda_pinned_and_pageable_keep_source_alive_during_timer(self):
+        # A fake Torch tensor deliberately has an expensive Python destructor.
+        # Its release must happen OUTSIDE the full-pipeline timer in both
+        # methods, even when pinned staging replaces the transfer source.
+        import hashlib
+        import time
+        from phistream import pipeline
+
+        fixture = self.folder / "fake-cuda-scratch.dat"
+        digest, _ = pipeline._write_fixture(fixture, 256 * 1024)
+        released = []
+
+        class FakeSource:
+            def __del__(self):
+                started = time.perf_counter()
+                time.sleep(0.018)
+                released.append(time.perf_counter() - started)
+
+        class FakeCuda:
+            def synchronize(self):
+                pass
+
+        class FakeTorch:
+            cuda = FakeCuda()
+            uint8 = "uint8"
+
+            def frombuffer(self, buffer, dtype=None):
+                return FakeSource()
+
+        class FakePinned:
+            def copy_(self, src):
+                pass
+
+        class FakeGPUResult:
+            def cpu(self):
+                return self
+
+            def tolist(self):
+                return [0, 0, 255]
+
+        class FakeDest:
+            def copy_(self, src, non_blocking=False):
+                pass
+
+            def __getitem__(self, indices):
+                return FakeGPUResult()
+
+        state = {
+            "torch": FakeTorch(), "pinned": FakePinned(), "dest": FakeDest(),
+        }
+        for mode in ("pageable", "pinned"):
+            released.clear()
+            result = pipeline._cuda_trial(fixture, 256 * 1024, digest, mode, state)
+            self.assertEqual(len(released), 1)
+            self.assertGreater(result["source_release_after_timing"], .015)
+            self.assertLess(result["total"], result["source_release_after_timing"])
+            self.assertTrue(result["checked"])
 
     def test_invalid_inputs_no_files(self):
         for kwargs in (
