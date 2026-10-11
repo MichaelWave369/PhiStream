@@ -128,3 +128,18 @@ Full [reference-trace protocol](docs/REFERENCE_TRACE.md). No model downloads,
 reference executor integration, tokenizer or automated upload. Matching
 user-provided traces are *not* independent-reference authentication or full
 logit parity, and **no pretrained model parity has yet been recorded**.
+
+## Memory policy preflight (Gate C research candidate)
+
+Use `plan-memory` to estimate active FP32 layer weights, KV cache,
+head chunks and attention workspace against a selected memory budget.
+**An estimate is not a GPU fit or performance guarantee.**
+
+```sh
+python -m phistream.cli plan-memory /path/to/local-llama --capacity-mib 12288 --reserve-mib 1024 --context-tokens 512 --device scenario
+```
+
+With `--device cuda`, the policy is also capped by observed free GPU
+bytes. `run-llama-ids` optionally accepts `--capacity-mib` to block
+oversized policy scenarios before weight execution (not a hard OOM guard).
+See [memory preflight documentation](docs/MEMORY_PREFLIGHT.md).

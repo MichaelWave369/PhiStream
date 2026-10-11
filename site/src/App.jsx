@@ -126,7 +126,7 @@ const STEPS = [
   { index: '01', state: 'COMPLETE', title: 'Independent inference core', text: 'Toy decoder, memory-mapped weights, layer streaming, resident reference, integrity receipts.', status: 'complete' },
   { index: '02', state: 'NEXT', title: 'CUDA verification', text: 'Test numerics, allocator use, and real host-to-device transfers on the RTX 5070.', status: 'next' },
   { index: '03', state: 'EXPERIMENTAL', title: 'Llama token-ID execution', text: 'Local Llama token execution and offline reference-trace comparison; independently authenticated real-model parity is still pending.', status: 'next' },
-  { index: '04', state: 'RESEARCH', title: 'Adaptive layer residency', text: 'Benchmark-driven GPU/RAM/SSD placement with transparent budgets and fallbacks.', status: 'future' },
+  { index: '04', state: 'EXPERIMENTAL', title: 'Memory policy preflight', text: 'Metadata-derived VRAM/KV estimates and optional execution refusal; dynamic layer residency remains research, not a proven speedup.', status: 'next' },
   { index: '05', state: 'RESEARCH', title: 'Vessie / BrainC integration', text: 'Optional audited inference routing with BudgetGenius cost and speed receipts.', status: 'future' }
 ];
 

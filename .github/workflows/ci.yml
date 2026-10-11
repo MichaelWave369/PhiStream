@@ -35,6 +35,8 @@ jobs:
         run: |
           python -m phistream.cli fingerprint-checkpoint --help
           python -m phistream.cli compare-reference --help
+      - name: Memory preflight CLI contract (offline)
+        run: python -m phistream.cli plan-memory --help
       - name: Reproducible synthetic fixture
         run: |
           python -m phistream.cli init-fixture /tmp/phistream-ci-fixture
