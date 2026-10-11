@@ -111,3 +111,20 @@ no tokenizer, no GGUF adapter, no automatic downloads, no external model
 reference parity, and no 70B or RTX performance result. Unsupported Llama
 variants and extra tensor fields are rejected. See the [execution safety
 and compatibility guide](docs/LLAMA_EXECUTION.md).
+
+
+## Offline reference-trace comparison (Gate B verification candidate)
+
+PhiStream can now check a **user-supplied independent reference trace** against
+the same, **fully SHA256-fingerprinted** local checkpoint. It compares exact
+greedy token IDs and explicitly sampled logits under teacher forcing.
+
+```sh
+python -m phistream.cli fingerprint-checkpoint /path/to/local-llama
+python -m phistream.cli compare-reference /path/to/local-llama --trace benchmarks/local/reference-trace.json --device cpu --output benchmarks/local/reference-result.json
+```
+
+Full [reference-trace protocol](docs/REFERENCE_TRACE.md). No model downloads,
+reference executor integration, tokenizer or automated upload. Matching
+user-provided traces are *not* independent-reference authentication or full
+logit parity, and **no pretrained model parity has yet been recorded**.

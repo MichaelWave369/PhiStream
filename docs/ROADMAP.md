@@ -35,9 +35,16 @@ architectures and quantization fail closed. No tokenizer or real-model
 independent-reference parity has been established.
 See [Llama execution](LLAMA_EXECUTION.md).
 
+**Reference-trace validation candidate:** an offline CLI can compare local
+Llama outputs against user-supplied reference greedy token IDs and sampled
+logits, bound to SHA256 hashes of the complete checkpoint. The source of the
+reference is **asserted, not independently authenticated** and no pretrained
+model comparison has been run yet. See [reference protocol](REFERENCE_TRACE.md).
+
 - [x] Implement independently authored *read-only* safetensors inspector and on-demand bounded CPU tensor reader (local format tests; not external fixture or inference parity)
 - [x] Preflight one canonical Llama tensor naming/shape layout (structural only)
 - [x] Implement narrowly scoped canonical Llama execution adapter with independent **synthetic** causal reference tests
+- [x] Build fail-closed **user-supplied** reference-trace comparator (SHA256 bindings, teacher-forced greedy IDs, sampled logits, failure receipts)
 - [ ] Establish token/logit parity on a real licensed Llama checkpoint against external reference runtime
 - [x] Enforce local-only checkpoint parsing (no auto-download or trust_remote_code)
 - [x] Load named local canonical Llama tensors with bounded sequential layer staging

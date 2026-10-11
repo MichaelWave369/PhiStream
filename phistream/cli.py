@@ -83,6 +83,18 @@ def main() -> None:
     run.add_argument("--max-tensor-mib", type=int, default=512)
     run.add_argument("--head-rows", type=int, default=128)
     run.add_argument("--output", help="Write receipt to new local JSON file; refuses overwrite")
+    fingerprint = sp.add_parser("fingerprint-checkpoint",
+        help="SHA256 all local safetensors shards and config; no uploads")
+    fingerprint.add_argument("location")
+    fingerprint.add_argument("--output", help="Write new local JSON manifest; refuse overwrite")
+    compare = sp.add_parser("compare-reference",
+        help="Compare local Llama logits/greedy IDs against a user-provided independent trace")
+    compare.add_argument("location")
+    compare.add_argument("--trace", required=True, help="Local JSON reference trace")
+    compare.add_argument("--device", choices=["cpu", "cuda"], default="cpu")
+    compare.add_argument("--max-tensor-mib", type=int, default=512)
+    compare.add_argument("--head-rows", type=int, default=128)
+    compare.add_argument("--output", help="Save new local JSON comparison receipt; refuse overwrite")
     args = ap.parse_args()
     if args.command == "init-fixture":
         build_fixture(args.directory, ModelConfig(), args.seed)
@@ -131,6 +143,33 @@ def main() -> None:
             with path.open("x", encoding="utf-8") as output:
                 output.write(payload)
         print(payload, end="")
+        return
+    if args.command in ("fingerprint-checkpoint", "compare-reference"):
+        from pathlib import Path
+        from .reference import checkpoint_fingerprint, compare_reference, read_reference_trace
+        from .safeweights import LocalCheckpoint
+        checkpoint = LocalCheckpoint(args.location)
+        if args.command == "fingerprint-checkpoint":
+            result = {
+                "schema": "PHISTREAM_CHECKPOINT_FINGERPRINT_V1",
+                "provenance": "LOCAL_SHA256_COMPUTED_NOT_A_SIGNATURE",
+                "checkpoint_fingerprint": checkpoint_fingerprint(checkpoint),
+                "note": "Full local bytes hashed, not a proof of model license or identity.",
+            }
+        else:
+            result = compare_reference(
+                checkpoint, read_reference_trace(args.trace), device=args.device,
+                max_tensor_mib=args.max_tensor_mib, head_rows=args.head_rows,
+            )
+        payload = json.dumps(result, indent=2, allow_nan=False) + "\n"
+        if args.output:
+            dest = Path(args.output)
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            with dest.open("x", encoding="utf-8") as out:
+                out.write(payload)
+        print(payload, end="")
+        if args.command == "compare-reference" and result["status"] == "MISMATCH":
+            raise SystemExit(1)
         return
     store = ModelStore(args.directory)
     if args.command == "validate-device":
