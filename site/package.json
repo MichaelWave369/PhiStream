@@ -1,0 +1,19 @@
+{
+  "name": "phistream-web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "PhiStream public research dashboard",
+  "scripts": {
+    "dev": "node scripts/sync-benchmarks.mjs && vite --host",
+    "build": "node scripts/sync-benchmarks.mjs && vite build",
+    "preview": "vite preview --host"
+  },
+  "dependencies": {
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
+  },
+  "devDependencies": {
+    "vite": "^7.1.9"
+  }
+}
