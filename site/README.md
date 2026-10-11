@@ -35,3 +35,5 @@ The **Transfer Laboratory** reader supports local `PHISTREAM_TRANSFER_LAB_V1` re
 The **Paired Pipeline** reader accepts local `PHISTREAM_PIPELINE_LAB_V1` receipts, displaying complete synchronous pageable versus reusable pinned staging times, paired win counts and ratio. Browser-only, no backend. See [Paired Pipeline Lab](../docs/PIPELINE_LAB.md).
 
 The **Reusable Buffer Laboratory** accepts a local `PHISTREAM_REUSE_LAB_V1` JSON receipt, comparing buffer allocation strategies across three synthetic sizes. Browser-only, no upload. See [Reuse Lab](../docs/REUSE_LAB.md).
+
+The new **Direct Staging Laboratory** reader accepts local `PHISTREAM_DIRECT_READ_LAB_V1` receipts. It compares the legacy multi-copy path, direct pageable `file.readinto`, and direct pinned `file.readinto` across synthetic sizes; it never uploads files or runs device code. See [Direct Read Lab](../docs/DIRECT_READ_LAB.md).

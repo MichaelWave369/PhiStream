@@ -209,3 +209,13 @@ py -m phistream.cli reuse-lab --workspace "D:\PhiStream\Experiments" --gpu cuda 
 
 See [Reuse Laboratory](docs/REUSE_LAB.md). Local scratch files are deleted.
 CPU-only synthetic tests do not measure pinned GPU transfer speed.
+
+## Direct-to-Pinned Streaming Laboratory (PR #14, synthetic)
+
+The opt-in `direct-read-lab` compares the current copy-heavy `file → bytes → bytearray → pinned → GPU` path against `file.readinto()` writing directly into preallocated pageable or pinned **CPU** tensors, then synchronized H2D. It measures 4/16/64 MiB controlled synthetic bytes by default. It does **not** read directly into GPU VRAM, run Llama checkpoints or control Windows filesystem caching.
+
+```powershell
+py -m phistream.cli direct-read-lab --workspace "D:\PhiStream\Experiments" --gpu cuda --sizes-mib "4,16,64" --rounds 6 --warmups 2 --output "benchmarks\local\direct-rtx5070-multi.json"
+```
+
+See [Direct Read Lab](docs/DIRECT_READ_LAB.md). Nothing uploads automatically; the scratch fixture is temporary.

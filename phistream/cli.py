@@ -159,6 +159,14 @@ def main() -> None:
     reuse.add_argument("--rounds", type=int, default=6, choices=[6, 12])
     reuse.add_argument("--warmups", type=int, default=2, help="1–4 per method")
     reuse.add_argument("--output", help="Create a new local JSON receipt, refuse overwrite")
+    direct = sp.add_parser("direct-read-lab",
+        help="Opt-in synthetic direct file.readinto into preallocated host CPU/CUDA tensors")
+    direct.add_argument("--workspace", required=True, help="Existing local scratch directory")
+    direct.add_argument("--gpu", choices=["none", "cuda"], default="none")
+    direct.add_argument("--sizes-mib", default="4,16,64", help="1–3 bounded MiB sizes")
+    direct.add_argument("--rounds", type=int, default=6, choices=[6, 12])
+    direct.add_argument("--warmups", type=int, default=2, help="1–4 per method")
+    direct.add_argument("--output", help="Create local receipt file, never overwrite")
     args = ap.parse_args()
     if args.command == "init-fixture":
         build_fixture(args.directory, ModelConfig(), args.seed)
@@ -333,6 +341,21 @@ def main() -> None:
             dest.parent.mkdir(parents=True, exist_ok=True)
             with dest.open("x", encoding="utf-8") as fh:
                 fh.write(payload)
+        print(payload, end="")
+        return
+    if args.command == "direct-read-lab":
+        from pathlib import Path
+        from .direct import run_direct_lab
+        result = run_direct_lab(
+            args.workspace, gpu=args.gpu, sizes_mib=args.sizes_mib,
+            rounds=args.rounds, warmups=args.warmups,
+        )
+        payload = json.dumps(result, indent=2, allow_nan=False) + "\n"
+        if args.output:
+            dest = Path(args.output)
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            with dest.open("x", encoding="utf-8") as target:
+                target.write(payload)
         print(payload, end="")
         return
     store = ModelStore(args.directory)
