@@ -22,11 +22,20 @@ checks until a user produces a verified receipt. See
 
 ## Gate B: compatibility, opt-in, licensed local weights
 
-- [ ] Implement independent, test-vector-checked *read-only* safetensors reader
-- [ ] Support explicit **one** Llama-compatible architecture/config adapter
-- [ ] Load local weights only (no auto-download or trust_remote_code)
+**v0.3 checkpoint-inspection candidate:** independently written, strictly local
+safetensors header/shard validation and canonical Llama shape preflight, with
+one bounded CPU tensor probe and optional streamed fingerprints. This is NOT
+inference, tokenizer integration, or a claim of GGUF/Ollama support.
+See [safetensors gate](SAFETENSORS.md).
+
+- [x] Implement independently authored *read-only* safetensors inspector and on-demand bounded CPU tensor reader (local format tests; not external fixture or inference parity)
+- [x] Preflight one canonical Llama tensor naming/shape layout (structural only)
+- [ ] Support explicit **one** Llama-compatible *execution* architecture/config adapter
+- [x] Enforce local-only checkpoint parsing (no auto-download or trust_remote_code)
+- [ ] Load local Llama weights into PhiStream's executor
 - [ ] Compare token ids/logits against separately recorded licensed reference weights
-- [ ] Never redistribute weights; respect licenses and local privacy
+- [x] No model weights bundled, uploaded or redistributed by preflight
+- [ ] Verify source licenses for selected real models and local privacy
 
 ## Gate C: measured performance (beat baseline **or do not claim victory**)
 

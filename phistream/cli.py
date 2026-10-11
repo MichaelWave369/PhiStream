@@ -66,6 +66,15 @@ def main() -> None:
     local.add_argument("--tokens", type=int, default=8)
     local.add_argument("--pin-mib", type=float, default=0.125)
     local.add_argument("--output", help="Optional local receipt file; refuses to overwrite")
+    inspect = sp.add_parser(
+        "inspect-checkpoint",
+        help="Inspect local safetensors header/shards and optional Llama shape layout; no execution",
+    )
+    inspect.add_argument("location", help="Explicit .safetensors file or local checkpoint directory")
+    inspect.add_argument("--llama-layout", action="store_true", help="Check canonical Llama tensor names and shapes")
+    inspect.add_argument("--hash", action="store_true", help="Stream SHA256 of every tensor (can be very slow)")
+    inspect.add_argument("--probe-tensor", metavar="NAME", help="Materialize only one bounded CPU tensor")
+    inspect.add_argument("--max-mib", type=int, default=64, help="Maximum tensor probe bytes in MiB (default 64)")
     args = ap.parse_args()
     if args.command == "init-fixture":
         build_fixture(args.directory, ModelConfig(), args.seed)
@@ -75,6 +84,24 @@ def main() -> None:
     if args.command == "doctor":
         from .diagnostics import device_information
         print(json.dumps(device_information(args.device), indent=2))
+        return
+    if args.command == "inspect-checkpoint":
+        from .safeweights import LocalCheckpoint
+        reader = LocalCheckpoint(args.location)
+        receipt = reader.inspect(llama_layout=args.llama_layout, hash_all=args.hash)
+        if args.probe_tensor:
+            if args.max_mib < 0 or args.max_mib > 4096:
+                raise ValueError("--max-mib must be between 0 and 4096")
+            t = reader.tensor(args.probe_tensor, max_bytes=args.max_mib * 1024 * 1024)
+            receipt["probe"] = {
+                "name": args.probe_tensor, "shape": list(t.shape),
+                "dtype": str(t.dtype), "device": str(t.device),
+                "nbytes": t.numel() * t.element_size(),
+                "note": "One tensor materialized on CPU; not inference or model compatibility proof",
+            }
+        print(json.dumps(receipt, indent=2, allow_nan=False))
+        if receipt["status"] == "LAYOUT_MISMATCH":
+            raise SystemExit(1)
         return
     store = ModelStore(args.directory)
     if args.command == "validate-device":

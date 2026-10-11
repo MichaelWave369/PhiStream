@@ -25,6 +25,9 @@ jobs:
           python -m pip install -e . --no-deps
       - name: Automated tests
         run: python -m unittest discover -s tests -v
+      - name: Verify checkpoint inspection CLI help (offline)
+        run: |
+          python -m phistream.cli inspect-checkpoint --help
       - name: Reproducible synthetic fixture
         run: |
           python -m phistream.cli init-fixture /tmp/phistream-ci-fixture

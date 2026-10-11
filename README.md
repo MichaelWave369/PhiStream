@@ -77,3 +77,19 @@ See [docs/DEVICE_VALIDATION.md](docs/DEVICE_VALIDATION.md) for limitations.
 The [live research dashboard](https://michaelwave369.github.io/PhiStream/)
 can read a local JSON CUDA receipt in-browser. It does not submit it to a
 server or present uploaded, user-provided results as independently verified.
+
+## Safetensors inspection and Llama shape preflight (Gate B candidate)
+
+PhiStream has an **offline, read-only safetensors checkpoint reader**, supporting
+explicit single-file and indexed sharded checkpoints. It validates binary
+headers, shard maps, tensor ranges, and optionally canonical Llama tensor
+shapes. `--probe-tensor` materializes one bounded CPU tensor on demand:
+
+```sh
+python -m phistream.cli inspect-checkpoint /path/to/local/checkpoint --llama-layout
+python -m phistream.cli inspect-checkpoint /path/to/local/checkpoint --probe-tensor model.norm.weight
+```
+
+See [Gate B documentation](docs/SAFETENSORS.md). This **does not yet perform
+real-model inference**; local Ollama GGUF weights need a separate adapter.
+No checkpoint downloads, deserialization hooks, or public model files.
