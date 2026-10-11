@@ -1,0 +1,27 @@
+# ΦStream Web
+
+Public, dark-mode React/Vite GitHub Pages companion for the **PhiStream experimental inference research engine**.
+
+## Local development
+
+From the repository root:
+
+```sh
+cd site
+npm install
+npm run dev
+```
+
+The development and build scripts validate and copy the two committed **CPU synthetic fixture** receipts from `../benchmarks` into `public/benchmarks`. The UI does not collect data, connect to a GPU, execute models, or claim benchmark results for consumer hardware.
+
+## Deployment
+
+The root `.github/workflows/pages.yml` builds the site and deploys `site/dist` using official GitHub Pages Actions on pushes to `main` and manual workflow runs. PRs build but do not publish. Base path is `/PhiStream/`. Published URL, when GitHub Pages is enabled: https://michaelwave369.github.io/PhiStream/
+
+If GitHub Pages isn't enabled, repository Settings → Pages → **Build and deployment** → **GitHub Actions**. Repository admins must configure this when necessary; the deployment workflow cannot promise to enable Pages automatically.
+
+The **capacity explorer is arithmetic only** (parameter count × storage bytes/parameter) and reserves an illustrative slice of device memory. It is not a GPU feasibility calculator. All performance receipts are explicitly synthetic, CPU-only tests. No model files shipped.
+
+## Security
+
+No secrets or user files are uploaded. GitHub Pages is static. The only runtime network request to data is for the public static benchmark JSON published with the site. Google Fonts are optional decorative resources, with local fallback fonts.
