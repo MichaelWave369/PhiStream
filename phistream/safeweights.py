@@ -114,7 +114,7 @@ class SafeTensorFile:
             if not isinstance(name, str) or not name or not isinstance(info, dict):
                 raise ValueError("Malformed tensor entry")
             dtype, shape, offsets = info.get("dtype"), info.get("shape"), info.get("data_offsets")
-            if dtype not in BYTES_PER_ELEMENT:
+            if not isinstance(dtype, str) or dtype not in BYTES_PER_ELEMENT:
                 raise ValueError(f"Unsupported tensor dtype: {dtype!r}")
             if (not isinstance(shape, list) or len(shape) > 16 or any(
                 type(dim) is not int or dim < 0 for dim in shape
@@ -168,6 +168,8 @@ class SafeTensorFile:
         if len(payload) != t.nbytes:
             raise ValueError("Checkpoint changed while reading a tensor")
         dtype = getattr(torch, TORCH_TYPES[t.dtype])
+        if t.nbytes == 0:
+            return torch.empty(t.shape, dtype=dtype, device="cpu")
         # Own bytes in a bytearray so no non-writable numpy alias reaches torch.
         result = torch.frombuffer(bytearray(payload), dtype=dtype)
         return result.reshape(t.shape)
