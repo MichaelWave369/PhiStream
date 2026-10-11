@@ -28,11 +28,19 @@ one bounded CPU tensor probe and optional streamed fingerprints. This is NOT
 inference, tokenizer integration, or a claim of GGUF/Ollama support.
 See [safetensors gate](SAFETENSORS.md).
 
+**Next experimental candidate:** canonical Llama token-ID execution from locally
+supplied safetensors, compared on tiny untrained F32/F16/BF16 fixtures against an
+independent full-sequence causal reference. Unsupported RoPE scaling, variant
+architectures and quantization fail closed. No tokenizer or real-model
+independent-reference parity has been established.
+See [Llama execution](LLAMA_EXECUTION.md).
+
 - [x] Implement independently authored *read-only* safetensors inspector and on-demand bounded CPU tensor reader (local format tests; not external fixture or inference parity)
 - [x] Preflight one canonical Llama tensor naming/shape layout (structural only)
-- [ ] Support explicit **one** Llama-compatible *execution* architecture/config adapter
+- [x] Implement narrowly scoped canonical Llama execution adapter with independent **synthetic** causal reference tests
+- [ ] Establish token/logit parity on a real licensed Llama checkpoint against external reference runtime
 - [x] Enforce local-only checkpoint parsing (no auto-download or trust_remote_code)
-- [ ] Load local Llama weights into PhiStream's executor
+- [x] Load named local canonical Llama tensors with bounded sequential layer staging
 - [ ] Compare token ids/logits against separately recorded licensed reference weights
 - [x] No model weights bundled, uploaded or redistributed by preflight
 - [ ] Verify source licenses for selected real models and local privacy
