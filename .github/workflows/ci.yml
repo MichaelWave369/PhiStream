@@ -28,6 +28,9 @@ jobs:
       - name: Verify checkpoint inspection CLI help (offline)
         run: |
           python -m phistream.cli inspect-checkpoint --help
+      - name: Llama token-ID CLI preflight (no model download)
+        run: |
+          python -m phistream.cli run-llama-ids --help
       - name: Reproducible synthetic fixture
         run: |
           python -m phistream.cli init-fixture /tmp/phistream-ci-fixture

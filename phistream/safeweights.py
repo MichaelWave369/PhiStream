@@ -174,6 +174,38 @@ class SafeTensorFile:
         result = torch.frombuffer(bytearray(payload), dtype=dtype)
         return result.reshape(t.shape)
 
+    def read_axis0_rows(self, name: str, start: int, end: int, *,
+                        max_bytes: int = 256 * 1024 * 1024):
+        """Read only requested contiguous rows of a local 2D weight matrix.
+
+        This allows embedding lookup and an LM-head projection to stream through
+        large vocabulary matrices without retaining the entire matrix in RAM.
+        """
+        if name not in self.entries:
+            raise KeyError(name)
+        entry = self.entries[name]
+        if len(entry.shape) != 2 or entry.dtype not in TORCH_TYPES:
+            raise ValueError("Only supported 2D numeric tensors allow row reads")
+        rows, columns = entry.shape
+        if (type(start) is not int or type(end) is not int or not 0 <= start <= end <= rows
+                or type(max_bytes) is not int or max_bytes < 0):
+            raise ValueError("Invalid row slice or byte budget")
+        length = (end - start) * columns * BYTES_PER_ELEMENT[entry.dtype]
+        if length > max_bytes:
+            raise ValueError("Requested rows exceed configured tensor read budget")
+        if sys.byteorder != "little":
+            raise RuntimeError("Row reader requires little-endian CPU")
+        import torch
+        dtype = getattr(torch, TORCH_TYPES[entry.dtype])
+        if length == 0:
+            return torch.empty((end - start, columns), dtype=dtype)
+        with self.path.open("rb") as fh:
+            fh.seek(entry.start + start * columns * BYTES_PER_ELEMENT[entry.dtype])
+            data = fh.read(length)
+        if len(data) != length:
+            raise ValueError("Checkpoint changed during row read")
+        return torch.frombuffer(bytearray(data), dtype=dtype).reshape(end - start, columns)
+
     def fingerprint(self, name: str, *, chunk_bytes: int = 4 * 1024 * 1024) -> str:
         """Optional full-tensor hash, streamed in bounded chunks."""
         t = self.entries[name]

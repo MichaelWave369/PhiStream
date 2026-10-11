@@ -75,6 +75,14 @@ def main() -> None:
     inspect.add_argument("--hash", action="store_true", help="Stream SHA256 of every tensor (can be very slow)")
     inspect.add_argument("--probe-tensor", metavar="NAME", help="Materialize only one bounded CPU tensor")
     inspect.add_argument("--max-mib", type=int, default=64, help="Maximum tensor probe bytes in MiB (default 64)")
+    run = sp.add_parser("run-llama-ids", help="Execute local canonical Llama token IDs; no tokenizer or reference claim")
+    run.add_argument("location", help="Explicit local safetensors checkpoint directory")
+    run.add_argument("--prompt", required=True, help="Comma-separated token IDs from a separately licensed tokenizer")
+    run.add_argument("--tokens", type=int, default=4)
+    run.add_argument("--device", choices=["cpu", "cuda"], default="cpu")
+    run.add_argument("--max-tensor-mib", type=int, default=512)
+    run.add_argument("--head-rows", type=int, default=128)
+    run.add_argument("--output", help="Write receipt to new local JSON file; refuses overwrite")
     args = ap.parse_args()
     if args.command == "init-fixture":
         build_fixture(args.directory, ModelConfig(), args.seed)
@@ -102,6 +110,27 @@ def main() -> None:
         print(json.dumps(receipt, indent=2, allow_nan=False))
         if receipt["status"] == "LAYOUT_MISMATCH":
             raise SystemExit(1)
+        return
+    if args.command == "run-llama-ids":
+        from pathlib import Path
+        from .safeweights import LocalCheckpoint
+        from .llama import execute_local_tokens
+        raw_ids = args.prompt.split(",")
+        if not raw_ids or len(raw_ids) > 2048 or any(not x.strip().isdigit() for x in raw_ids):
+            raise ValueError("--prompt must be 1-2048 comma-separated nonnegative decimal token IDs")
+        prompt = [int(x.strip()) for x in raw_ids]
+        receipt = execute_local_tokens(
+            LocalCheckpoint(args.location), prompt, args.tokens,
+            device=args.device, max_tensor_mib=args.max_tensor_mib,
+            head_rows=args.head_rows,
+        )
+        payload = json.dumps(receipt, indent=2, allow_nan=False) + "\n"
+        if args.output:
+            path = Path(args.output)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            with path.open("x", encoding="utf-8") as output:
+                output.write(payload)
+        print(payload, end="")
         return
     store = ModelStore(args.directory)
     if args.command == "validate-device":

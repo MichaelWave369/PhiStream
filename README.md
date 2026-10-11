@@ -93,3 +93,21 @@ python -m phistream.cli inspect-checkpoint /path/to/local/checkpoint --probe-ten
 See [Gate B documentation](docs/SAFETENSORS.md). This **does not yet perform
 real-model inference**; local Ollama GGUF weights need a separate adapter.
 No checkpoint downloads, deserialization hooks, or public model files.
+
+## Local Llama token-ID execution (Gate B experimental candidate)
+
+PhiStream now has a **narrow canonical Llama-style safetensors inference
+adapter**, using independently implemented Llama split-half RoPE, GQA,
+RMSNorm, SwiGLU, per-layer weight streaming, and chunked vocabulary logits.
+The adapter only accepts local explicitly specified checkpoints. Example:
+
+```sh
+python -m phistream.cli inspect-checkpoint /path/to/checkpoint --llama-layout
+python -m phistream.cli run-llama-ids /path/to/checkpoint --prompt 1,2,3 --tokens 4 --device cpu
+```
+
+**This is experimental token-ID execution, not ready-to-use chat.** It has
+no tokenizer, no GGUF adapter, no automatic downloads, no external model
+reference parity, and no 70B or RTX performance result. Unsupported Llama
+variants and extra tensor fields are rejected. See the [execution safety
+and compatibility guide](docs/LLAMA_EXECUTION.md).
