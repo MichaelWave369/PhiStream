@@ -195,3 +195,17 @@ layers, model throughput, asynchronous prefetch or adaptive GPU placement.
 Pipeline timing attribution: new V1 receipts also report pre-H2D synchronization and the per-trial **unattributed wall-time** remainder. Above-1 pageable/pinned time ratio favors pinned; below-1 favors pageable. Existing V1 receipts remain valid. See [Pipeline Lab](docs/PIPELINE_LAB.md).
 
 **Timing correction:** PR #12 symmetrically retains the temporary pageable tensor through the full-pipeline timer for both CUDA variants, measures buffer-release overhead after timing, and labels the lifecycle in new V1 receipts. Prior pinned-pageable comparisons may include an asymmetric Python memory-release cost; see [pipeline measurement methodology](docs/PIPELINE_LAB.md).
+
+## Reusable Host Buffer Lab (PR #13 experimental)
+
+PhiStream can now compare three **synthetic** CUDA transfer strategies at
+multiple sizes: pageable, newly allocated pinned memory and preallocated
+reusable pinned memory. The default 4/16/64 MiB lab uses six balanced
+method permutations per size. No real model is executed.
+
+```powershell
+py -m phistream.cli reuse-lab --workspace "D:\PhiStream\Experiments" --gpu cuda --sizes-mib "4,16,64" --rounds 6 --warmups 2 --output "benchmarks\local\reuse-rtx5070-multi.json"
+```
+
+See [Reuse Laboratory](docs/REUSE_LAB.md). Local scratch files are deleted.
+CPU-only synthetic tests do not measure pinned GPU transfer speed.

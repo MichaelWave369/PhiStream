@@ -73,11 +73,17 @@ GPU results have been measured. See [memory preflight](MEMORY_PREFLIGHT.md).
 - [ ] GPU dynamic budget with measured allocator margin, adaptive layer residency and actual OOM recovery
 - [x] Read-only Windows/Linux RAM, opt-in CUDA free VRAM and explicit drive capacity snapshots with metadata-derived, **unapproved** pinned-layer advice (not applied by current executor)
 - [x] Bounded paired sequential file → host → CUDA pipeline timing with warmups, balanced ordering and whole-path wall-clock receipts (no model tensors)
+- [x] Experimental 3-way multi-size pageable/fresh-pinned/reused-pinned CUDA synthetic transfer lab, balanced method ordering, before any real-model scheduler
 - [ ] Async staging and prefetch with synchronization correctness tests
 - [x] Controlled scratch file read, host copy and pageable/pinned H2D transfer lab with repeated JSON receipts (OS cache **not** controlled; not a real model benchmark)
 - [ ] Pinned-memory and direct disk-read profiling (OS-dependent)
 - [ ] Residency policy tuned against trace, not speculative NBG claims
 - [ ] Prefill batching, GQA KV budget, quantized storage as optional opt-in
+**PR #13:** CUDA reusable-buffer size sweep records per-size timing and
+method wins for synthetic bytes; actual RTX hardware receipt pending.
+Full model parity and model-layer prefetch remain unverified. See
+[reusable buffer lab](REUSE_LAB.md).
+
 - [ ] Compare against Ollama/llama.cpp on same exact weights/tokens/hardware
 - [ ] Report TTFT, decode tokens/sec, real peak GPU allocation, RAM, disk reads, errors
 - [ ] Record throughput separately for cold/warm caches and context lengths 128/512/2048

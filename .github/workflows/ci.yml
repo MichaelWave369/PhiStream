@@ -50,6 +50,10 @@ jobs:
         run: |
           python -m phistream.cli pipeline-lab --help
           python -m phistream.cli pipeline-lab --workspace /tmp --gpu none --size-mib 1 --repeats 4 --warmups 1 > /tmp/phistream-pipeline-cpu.json
+      - name: Reuse lab bounded CPU mock smoke
+        run: |
+          python -m phistream.cli reuse-lab --help
+          python -m phistream.cli reuse-lab --workspace /tmp --gpu none --sizes-mib 1 --rounds 6 --warmups 1 > /tmp/phistream-reuse-cpu.json
       - name: Reproducible synthetic fixture
         run: |
           python -m phistream.cli init-fixture /tmp/phistream-ci-fixture
