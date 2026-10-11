@@ -96,7 +96,7 @@ class MemoryPreflightTests(unittest.TestCase):
         name = "model.layers.0.self_attn.q_proj.weight"
         orig = self.checkpoint.entries[name]
         from dataclasses import replace
-        self.checkpoint.entries[name] = replace(orig, shape=(4096, 4096))
+        self.checkpoint.entries[name] = replace(orig, shape=(4096, 4096), end=orig.start + 4096 * 4096 * 2)
         # Deliberately mutate the metadata in this unit test to simulate a large
         # validly-sized layer, without allocating a giant real tensor on CI.
         from phistream.llama import LlamaSettings
