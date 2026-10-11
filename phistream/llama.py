@@ -259,12 +259,29 @@ def execute_local_tokens(
     device: str = "cpu",
     max_tensor_mib: int = 512,
     head_rows: int = 128,
+    capacity_mib: float | None = None,
+    reserve_mib: float = 512.0,
 ) -> dict:
     """Receipt with no claim of independent reference agreement."""
     if not isinstance(prompt, list) or not prompt or len(prompt) > 2048:
         raise ValueError("Specify a nonempty prompt of at most 2048 token IDs")
     if type(tokens) is not int or tokens < 1 or tokens > 128:
         raise ValueError("Token count must be 1 to 128")
+    plan = None
+    if capacity_mib is not None:
+        from .memory import memory_preflight, refuse_blocked
+        observed_free = None
+        if device == "cuda":
+            if not torch.cuda.is_available():
+                raise RuntimeError("CUDA unavailable; refusing silent CPU fallback")
+            observed_free = int(torch.cuda.mem_get_info()[0])
+        plan = memory_preflight(
+            checkpoint, context_tokens=len(prompt) + tokens - 1,
+            capacity_mib=capacity_mib, reserve_mib=reserve_mib,
+            max_tensor_mib=max_tensor_mib, head_rows=head_rows,
+            observed_free_bytes=observed_free,
+        )
+        refuse_blocked(plan)
     engine = StreamingLlama(checkpoint, device=device, max_tensor_mib=max_tensor_mib,
                             head_rows=head_rows)
     started = time.perf_counter()
@@ -296,6 +313,7 @@ def execute_local_tokens(
         "weight_load_seconds_including_transfers": round(engine.weight_load_seconds, 6),
         "peak_cuda_allocated_bytes": engine.last_peak_cuda_allocated,
         "reference_parity": "NOT_ESTABLISHED_FOR_THIS_CHECKPOINT",
+        "memory_preflight": plan,
         "interpretation": (
             "Locally executed token IDs with narrow Llama FP32 math. "
             "No tokenizer, EOS policy, license validation, model-specific reference parity, "

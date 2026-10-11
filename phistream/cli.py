@@ -95,6 +95,25 @@ def main() -> None:
     compare.add_argument("--max-tensor-mib", type=int, default=512)
     compare.add_argument("--head-rows", type=int, default=128)
     compare.add_argument("--output", help="Save new local JSON comparison receipt; refuse overwrite")
+    mem = sp.add_parser("plan-memory",
+        help="Offline Llama metadata memory policy estimate; never a GPU fit guarantee")
+    mem.add_argument("location", help="Explicit local compatible Llama checkpoint")
+    mem.add_argument("--capacity-mib", type=float, required=True,
+                     help="User-specified memory budget in MiB (scenario or GPU cap)")
+    mem.add_argument("--reserve-mib", type=float, default=512.0,
+                     help="Additional safety reserve in MiB (default 512)")
+    mem.add_argument("--context-tokens", type=int, required=True)
+    mem.add_argument("--device", choices=["scenario", "cuda"], default="scenario",
+                     help="Scenario never queries GPU; cuda caps by actual free memory")
+    mem.add_argument("--max-tensor-mib", type=int, default=512)
+    mem.add_argument("--head-rows", type=int, default=128)
+    mem.add_argument("--output", help="Write a new local JSON plan; refuse overwrite")
+    mem.add_argument("--strict", action="store_true",
+                     help="Exit nonzero if policy blocks the requested plan")
+    run.add_argument("--capacity-mib", type=float,
+                     help="Opt-in memory policy guard before execution (not a fit guarantee)")
+    run.add_argument("--reserve-mib", type=float, default=512.0,
+                     help="Safety reserve, used only with --capacity-mib")
     args = ap.parse_args()
     if args.command == "init-fixture":
         build_fixture(args.directory, ModelConfig(), args.seed)
@@ -135,6 +154,7 @@ def main() -> None:
             LocalCheckpoint(args.location), prompt, args.tokens,
             device=args.device, max_tensor_mib=args.max_tensor_mib,
             head_rows=args.head_rows,
+            capacity_mib=args.capacity_mib, reserve_mib=args.reserve_mib,
         )
         payload = json.dumps(receipt, indent=2, allow_nan=False) + "\n"
         if args.output:
@@ -171,6 +191,31 @@ def main() -> None:
         if args.command == "compare-reference" and result["status"] == "MISMATCH":
             raise SystemExit(1)
         return
+    if args.command == "plan-memory":
+        from pathlib import Path
+        from .safeweights import LocalCheckpoint
+        from .memory import memory_preflight
+        observed = None
+        if args.device == "cuda":
+            if not torch.cuda.is_available():
+                raise RuntimeError("CUDA requested but unavailable; no CPU fallback")
+            observed = int(torch.cuda.mem_get_info()[0])
+        report = memory_preflight(
+            LocalCheckpoint(args.location), context_tokens=args.context_tokens,
+            capacity_mib=args.capacity_mib, reserve_mib=args.reserve_mib,
+            max_tensor_mib=args.max_tensor_mib, head_rows=args.head_rows,
+            observed_free_bytes=observed,
+        )
+        payload = json.dumps(report, indent=2, allow_nan=False) + "\n"
+        if args.output:
+            destination = Path(args.output)
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            with destination.open("x", encoding="utf-8") as out:
+                out.write(payload)
+        print(payload, end="")
+        if args.strict and report["status"] == "BLOCKED_BY_POLICY":
+            raise SystemExit(2)
+        return
     store = ModelStore(args.directory)
     if args.command == "validate-device":
         from .diagnostics import validate_device
@@ -195,7 +240,6 @@ def main() -> None:
     elif args.command == "parity":
         a = PhiStreamEngine(store, mode="stream", device=args.device)
         b = PhiStreamEngine(store, mode="resident", device=args.device)
-        import torch
         max_delta = 0.0
         for t in [1, 2, 3, 4]:
             l, r = a.step(t), b.step(t)
