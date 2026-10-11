@@ -1,0 +1,41 @@
+name: PhiStream CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cpu-fixture-and-parity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install CPU-only dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install -e . --no-deps
+      - name: Automated tests
+        run: python -m unittest discover -s tests -v
+      - name: Reproducible synthetic fixture
+        run: |
+          python -m phistream.cli init-fixture /tmp/phistream-ci-fixture
+          python -m phistream.cli verify /tmp/phistream-ci-fixture
+          python -m phistream.cli parity /tmp/phistream-ci-fixture --device cpu
+      - name: CPU bench receipts (not a large-model benchmark)
+        run: |
+          mkdir -p /tmp/phistream-receipts
+          python -m phistream.cli bench /tmp/phistream-ci-fixture --mode stream --device cpu > /tmp/phistream-receipts/stream.json
+          python -m phistream.cli bench /tmp/phistream-ci-fixture --mode resident --device cpu > /tmp/phistream-receipts/resident.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: phistream-cpu-synthetic-receipts
+          path: /tmp/phistream-receipts/

@@ -1,0 +1,42 @@
+{
+  "provenance": "MEASURED_ON_THIS_MACHINE_SYNTHETIC_UNTRAINED",
+  "device": "cpu",
+  "torch_version": "2.10.0+cpu",
+  "platform": "Linux-6.18.44-x86_64-with-glibc2.41",
+  "gpu_name": null,
+  "config": {
+    "vocab_size": 128,
+    "dim": 64,
+    "n_layers": 4,
+    "n_heads": 4,
+    "n_kv_heads": 2,
+    "ffn_dim": 128,
+    "max_context": 128,
+    "rope_theta": 10000,
+    "rms_eps": 0.00001
+  },
+  "model_weight_bytes": 657664,
+  "pin_budget_mib": 0,
+  "prompt_token_ids": [
+    1,
+    2,
+    3
+  ],
+  "generated_token_ids": [
+    6,
+    6,
+    6,
+    6
+  ],
+  "peak_cuda_allocated_bytes": null,
+  "interpretation": "Toy parity/performance fixture, not a usable language model or large-model benchmark",
+  "date_utc": "2026-10-11T01:00:57.707457+00:00",
+  "mode": "stream",
+  "pinned_layer_count": 0,
+  "pinned_layer_parameter_bytes": 0,
+  "total_seconds": 0.013695,
+  "generated_tokens_per_second_end_to_end": 292.083394,
+  "weight_load_events": 219,
+  "weight_bytes_loaded_total": 3617024,
+  "weight_load_seconds": 0.001449
+}
