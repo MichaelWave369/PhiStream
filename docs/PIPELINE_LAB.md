@@ -65,3 +65,30 @@ The code is tested on a CPU runner using a 1 MiB scratch fixture, failure
 handling and cleanup. No RTX 5070 GPU measurement exists for this new
 pipeline command until you execute it locally. No Vessie routing or model
 execution approval is implied by any passing pipeline receipt.
+
+## Interpreting hidden overhead (PR #11)
+
+Your RTX 5070's first 64 MiB paired run recorded **40.378 ms** pageable
+versus **41.985 ms** pinned full-pipeline medians, with 0/8 pinned wins.
+Although pinned H2D was faster, the pinned path also paid for host staging
+and previously unattributed gaps inside the whole-path wall clock.
+
+The next V1 receipts now expose:
+
+- `methods.<mode>.measurements.pre_h2d_sync`: elapsed seconds spent at the
+  explicit CUDA synchronization immediately before the H2D timer.
+- `methods.<mode>.measurements.unattributed_wall_time`: for each trial,
+  complete wall time MINUS file read, host preparation, optional pinned
+  stage, pre-H2D sync, and H2D. This is a time **residual**, not a new
+  transfer or bandwidth measurement. Other Python bookkeeping contributes.
+- `paired_outcome.median_ratio_favors`: `PAGEABLE`, `PINNED` or `TIE`.
+  A pageable/pinned ratio **below 1.0** favors pageable, not pinned.
+
+The accounting is per trial because subtracting medians can conceal
+variability and is not generally equal to the median residual. Zero
+residual is permitted. The older V1 JSON files remain importable;
+new timing fields may simply be absent from them.
+
+No GPU performance claim follows from CI. The real RTX 5070 path must be
+retested with a new receipt to identify whether explicit synchronization
+or some other interpreter/runtime gap explains the ~2 ms remainder.

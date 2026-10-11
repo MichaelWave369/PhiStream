@@ -76,7 +76,8 @@ export default function PipelineReader() {
           <div><small>Pageable · median rate</small><strong>{rate(pageable.end_to_end.median_mib_per_second)}</strong></div>
           <div><small>Staged · median rate</small><strong>{rate(pinned.end_to_end.median_mib_per_second)}</strong></div>
         </div>
-        <p className="transfer-pinned">Median paired pageable/staged time ratio: <strong>{receipt.paired_outcome.median_pageable_total_over_pinned_total.toFixed(3)}×</strong>. Staged path won {receipt.paired_outcome.pinned_wins} of {receipt.trial_design.orders.length} pairs.</p>
+        <p className="transfer-pinned">Median paired pageable/staged time ratio: <strong>{receipt.paired_outcome.median_pageable_total_over_pinned_total.toFixed(3)}×</strong>. {receipt.paired_outcome.median_pageable_total_over_pinned_total < 1 ? 'Pageable favored' : receipt.paired_outcome.median_pageable_total_over_pinned_total > 1 ? 'Pinned favored' : 'Tie'} in this synthetic run. Staged path won {receipt.paired_outcome.pinned_wins} of {receipt.trial_design.orders.length} pairs.</p>
+        {pinned.unattributed_wall_time && <p className="transfer-pinned">Extra timing diagnostics · pinned pre-H2D synchronization: <strong>{ms(pinned.pre_h2d_sync?.median_seconds)}</strong>; pinned unattributed remainder: <strong>{ms(pinned.unattributed_wall_time.median_seconds)}</strong>; pageable unattributed remainder: <strong>{ms(pageable.unattributed_wall_time?.median_seconds)}</strong>. These are measured diagnostics, not a speedup claim.</p>}
         <p className="transfer-caveat">Local synthetic data, not real-model inference. Storage reads may come from Windows file cache. Warmup and paired ordering reduce noise but cannot eliminate it. No automatic layer placement or prefetch is enabled.</p>
       </>}
     </div>
