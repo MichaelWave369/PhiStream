@@ -193,3 +193,5 @@ See [Paired Pipeline Laboratory](docs/PIPELINE_LAB.md). File reads have
 layers, model throughput, asynchronous prefetch or adaptive GPU placement.
 
 Pipeline timing attribution: new V1 receipts also report pre-H2D synchronization and the per-trial **unattributed wall-time** remainder. Above-1 pageable/pinned time ratio favors pinned; below-1 favors pageable. Existing V1 receipts remain valid. See [Pipeline Lab](docs/PIPELINE_LAB.md).
+
+**Timing correction:** PR #12 symmetrically retains the temporary pageable tensor through the full-pipeline timer for both CUDA variants, measures buffer-release overhead after timing, and labels the lifecycle in new V1 receipts. Prior pinned-pageable comparisons may include an asymmetric Python memory-release cost; see [pipeline measurement methodology](docs/PIPELINE_LAB.md).

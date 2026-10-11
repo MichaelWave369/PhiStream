@@ -102,22 +102,37 @@ def _cuda_trial(path: Path, count: int, digest: str, mode: str, state: dict):
     started = time.perf_counter()
     data, read_seconds = _read_fixture(path, count)
     prepare_start = time.perf_counter()
-    src = torch.frombuffer(bytearray(data), dtype=torch.uint8)
+    # Retain the same 64 MiB-scale pageable allocation until AFTER the
+    # full wall-clock interval for BOTH modes. In the previous implementation
+    # reassigning `src` to the pinned tensor dropped the last reference to
+    # its host buffer *inside* the pinned timing interval. The pageable path
+    # released its buffer only after timing, biasing the comparison.
+    host_src = torch.frombuffer(bytearray(data), dtype=torch.uint8)
     prep_seconds = time.perf_counter() - prepare_start
+    device_src = host_src
     staging_seconds = None
     if mode == "pinned":
         t0 = time.perf_counter()
-        state["pinned"].copy_(src)
+        state["pinned"].copy_(host_src)
         staging_seconds = time.perf_counter() - t0
-        src = state["pinned"]
+        device_src = state["pinned"]
     sync_start = time.perf_counter()
     torch.cuda.synchronize()
     pre_h2d_sync_seconds = time.perf_counter() - sync_start
     copy_start = time.perf_counter()
-    state["dest"].copy_(src, non_blocking=False)
+    state["dest"].copy_(device_src, non_blocking=False)
     torch.cuda.synchronize()
     h2d_seconds = time.perf_counter() - copy_start
     total = time.perf_counter() - started
+
+    # Deliberately release temporary host tensor ownership after the clock
+    # stops for both methods. This cost is tracked as a separate diagnostic,
+    # rather than silently charged only to pinned staging.
+    release_start = time.perf_counter()
+    del device_src
+    del host_src
+    source_release_seconds = time.perf_counter() - release_start
+
     if hashlib.sha256(data).hexdigest() != digest:
         raise RuntimeError("Scratch file failed SHA256 integrity check")
 
@@ -129,7 +144,9 @@ def _cuda_trial(path: Path, count: int, digest: str, mode: str, state: dict):
     return {"total": total, "read": read_seconds,
             "prepare": prep_seconds, "h2d": h2d_seconds,
             "pinned_stage": staging_seconds,
-            "pre_h2d_sync": pre_h2d_sync_seconds, "checked": True}
+            "pre_h2d_sync": pre_h2d_sync_seconds,
+            "source_release_after_timing": source_release_seconds,
+            "checked": True}
 
 
 def _duration_stats(samples: list[float]) -> dict:
@@ -154,6 +171,9 @@ def _aggregate(trials: list[dict], size: int, gpu: bool) -> dict:
     if gpu:
         result["h2d"] = _stats([r["h2d"] for r in trials], size)
         result["pre_h2d_sync"] = _duration_stats([r["pre_h2d_sync"] for r in trials])
+        result["source_release_after_timing"] = _duration_stats(
+            [r["source_release_after_timing"] for r in trials]
+        )
         if all(t["pinned_stage"] is not None for t in trials):
             result["pinned_host_stage"] = _stats([r["pinned_stage"] for r in trials], size)
     # Each trial's reported wall time includes interval gaps between explicit
@@ -238,6 +258,8 @@ def run_pipeline_lab(workspace: str | Path, *, gpu: str = "none",
             "warmup_excluded_from_statistics": True, "order_seed": ORDER_SEED,
             "orders": order, "os_file_cache_controlled": False,
             "checksum_checked_outside_timing": True,
+            "host_tensor_lifetime": "RETAIN_UNTIL_END_OF_TIMED_INTERVAL_BOTH_METHODS",
+            "temporary_source_release_measured_after_timing": device,
             "cpu_fallback": False,
         },
         "methods": {
@@ -269,7 +291,8 @@ def run_pipeline_lab(workspace: str | Path, *, gpu: str = "none",
             "OS filesystem caching is uncontrolled; file reads are not cold-cache NVMe bandwidth.",
             "Warmups and deterministic balanced order reduce but do not eliminate noise.",
             "GPU wall-clock spans file reads, fresh pageable-buffer creation, optional pinned staging and synchronized H2D.",
-            "Pre-H2D synchronization is now separately timed. Residual wall time includes Python bookkeeping and other uninstrumented gaps.",
+            "Pre-H2D synchronization is timed, and source-tensor release is measured after full-pipeline timing in both CUDA modes.",
+            "Residual wall time includes any other Python bookkeeping and uninstrumented gaps.",
             "Reference bytes are hashed outside measured file-read interval; buffers are allocated before the trial.",
             "End-to-end here is one synchronous synthetic stage pipeline, not model token latency.",
             "CPU-only mode compares fresh and reused bytearray staging, not pinned RAM.",
