@@ -240,7 +240,6 @@ def main() -> None:
     elif args.command == "parity":
         a = PhiStreamEngine(store, mode="stream", device=args.device)
         b = PhiStreamEngine(store, mode="resident", device=args.device)
-        import torch
         max_delta = 0.0
         for t in [1, 2, 3, 4]:
             l, r = a.step(t), b.step(t)
