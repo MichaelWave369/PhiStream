@@ -31,3 +31,5 @@ The **Local CUDA receipt viewer** under Evidence parses a user-selected V1 recei
 The **Local Hardware Intelligence** reader loads either a `PHISTREAM_HARDWARE_SNAPSHOT_V1` or unapproved `PHISTREAM_RESIDENCY_ADVICE_V1` JSON file in-browser. No uploads or device probing occur in the website. Read [Hardware Advisor](../docs/HARDWARE_ADVISOR.md) for the Windows commands.
 
 The **Transfer Laboratory** reader supports local `PHISTREAM_TRANSFER_LAB_V1` receipts, with bounded synthetic-file warm reads, RAM copy and optional synchronized pageable/pinned H2D timing. Files are read directly in the browser; no upload or backend execution. See [Transfer Laboratory](../docs/TRANSFER_LAB.md).
+
+The **Paired Pipeline** reader accepts local `PHISTREAM_PIPELINE_LAB_V1` receipts, displaying complete synchronous pageable versus reusable pinned staging times, paired win counts and ratio. Browser-only, no backend. See [Paired Pipeline Lab](../docs/PIPELINE_LAB.md).

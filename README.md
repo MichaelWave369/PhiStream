@@ -176,3 +176,18 @@ See [Transfer Laboratory safety and evidence guide](docs/TRANSFER_LAB.md).
 The optional GPU mode requires functioning CUDA and never silently falls
 back to CPU. The temporary byte fixture is owned by the process and deleted
 on exit; only your explicitly requested local JSON receipt remains.
+
+## Paired end-to-end transfer pipeline (PR #10)
+
+The opt-in `pipeline-lab` tests the **complete synchronous** file-read →
+host preparation → pageable or preallocated pinned staging → CUDA transfer
+path. Methods are compared in reproducible balanced AB/BA pairs with
+separate warmups; checksum verification is outside measured durations.
+
+```powershell
+py -m phistream.cli pipeline-lab --workspace "D:\PhiStream\Experiments" --gpu cuda --size-mib 64 --repeats 8 --warmups 2 --output "benchmarks\local\pipeline-d-64m-rtx5070.json"
+```
+
+See [Paired Pipeline Laboratory](docs/PIPELINE_LAB.md). File reads have
+**uncontrolled Windows/OS caching**. This does not benchmark real Llama
+layers, model throughput, asynchronous prefetch or adaptive GPU placement.

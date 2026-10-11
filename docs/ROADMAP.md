@@ -72,6 +72,7 @@ GPU results have been measured. See [memory preflight](MEMORY_PREFLIGHT.md).
 - [x] Metadata-derived memory policy preflight for active FP32 layer, context KV, workspace and output projection, labeled scenario or observed CUDA free-memory (not a hard VRAM cap)
 - [ ] GPU dynamic budget with measured allocator margin, adaptive layer residency and actual OOM recovery
 - [x] Read-only Windows/Linux RAM, opt-in CUDA free VRAM and explicit drive capacity snapshots with metadata-derived, **unapproved** pinned-layer advice (not applied by current executor)
+- [x] Bounded paired sequential file → host → CUDA pipeline timing with warmups, balanced ordering and whole-path wall-clock receipts (no model tensors)
 - [ ] Async staging and prefetch with synchronization correctness tests
 - [x] Controlled scratch file read, host copy and pageable/pinned H2D transfer lab with repeated JSON receipts (OS cache **not** controlled; not a real model benchmark)
 - [ ] Pinned-memory and direct disk-read profiling (OS-dependent)
@@ -86,6 +87,11 @@ post-write disk reads, host bytearray copies and CUDA pageable/pinned
 transfers with explicit synchronization and end-to-end staging caution.
 User RTX performance is unmeasured until its local receipt is returned.
 See [transfer laboratory](TRANSFER_LAB.md).
+
+**PR #10 paired pipeline candidate:** balanced AB/BA pageable and reusable
+pinned-host staging for synthetic bytes, whole synchronous file-to-GPU path
+measurement, explicit warmups and stage attribution. OS cache uncontrolled;
+no compute overlap or live model stream. See [pipeline lab](PIPELINE_LAB.md).
 
 ## Gate D: Vessie integration
 

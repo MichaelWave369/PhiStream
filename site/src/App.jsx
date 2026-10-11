@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import DeviceReceipt from './DeviceReceipt.jsx';
 import HardwareReader from './HardwareReader.jsx';
 import TransferReader from './TransferReader.jsx';
+import PipelineReader from './PipelineReader.jsx';
 
 const REPO = 'https://github.com/MichaelWave369/PhiStream';
 const MODELS = [
@@ -186,6 +187,7 @@ export default function App() {
         <DeviceReceipt/>
         <HardwareReader/>
         <TransferReader/>
+        <PipelineReader/>
       </section>
 
       <section className="section container roadmap-section" id="roadmap">
