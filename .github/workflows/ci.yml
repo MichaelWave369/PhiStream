@@ -35,6 +35,10 @@ jobs:
           mkdir -p /tmp/phistream-receipts
           python -m phistream.cli bench /tmp/phistream-ci-fixture --mode stream --device cpu > /tmp/phistream-receipts/stream.json
           python -m phistream.cli bench /tmp/phistream-ci-fixture --mode resident --device cpu > /tmp/phistream-receipts/resident.json
+      - name: V1 device validation receipt on CPU (no CUDA claims)
+        run: |
+          python -m phistream.cli doctor --device cpu
+          python -m phistream.cli validate-device /tmp/phistream-ci-fixture --device cpu --tokens 8 --output /tmp/phistream-receipts/device-cpu.json
       - uses: actions/upload-artifact@v4
         with:
           name: phistream-cpu-synthetic-receipts

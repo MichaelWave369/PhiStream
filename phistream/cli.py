@@ -58,13 +58,39 @@ def main() -> None:
     parity = sp.add_parser("parity", help="Verify streamed and resident logits on this model")
     parity.add_argument("directory")
     parity.add_argument("--device", choices=["auto", "cpu", "cuda"], default="auto")
+    doctor = sp.add_parser("doctor", help="Inspect CPU or CUDA readiness (no downloads)")
+    doctor.add_argument("--device", choices=["cpu", "cuda"], default="cuda")
+    local = sp.add_parser("validate-device", help="Verify checksums, parity and CPU/CUDA toy-fixture receipts")
+    local.add_argument("directory")
+    local.add_argument("--device", choices=["cpu", "cuda"], default="cuda")
+    local.add_argument("--tokens", type=int, default=8)
+    local.add_argument("--pin-mib", type=float, default=0.125)
+    local.add_argument("--output", help="Optional local receipt file; refuses to overwrite")
     args = ap.parse_args()
     if args.command == "init-fixture":
         build_fixture(args.directory, ModelConfig(), args.seed)
         print(json.dumps({"status": "created", "path": args.directory,
                           "provenance": "SIMULATED_UNTRAINED_FIXTURE"}, indent=2))
         return
+    if args.command == "doctor":
+        from .diagnostics import device_information
+        print(json.dumps(device_information(args.device), indent=2))
+        return
     store = ModelStore(args.directory)
+    if args.command == "validate-device":
+        from .diagnostics import validate_device
+        from pathlib import Path
+        receipt = validate_device(store, args.device, pin_budget_mib=args.pin_mib, tokens=args.tokens)
+        data = json.dumps(receipt, indent=2, allow_nan=False) + "\n"
+        if args.output:
+            target = Path(args.output)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            with target.open("x", encoding="utf-8") as output:
+                output.write(data)
+        print(data, end="")
+        if receipt["status"] != "PASS":
+            raise SystemExit(1)
+        return
     if args.command == "verify":
         store.verify()
         print(json.dumps({"status": "verified", "tensor_count": len(store.entries)}, indent=2))

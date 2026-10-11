@@ -65,6 +65,7 @@ class ModelStore:
         if manifest.get("format") != "PHISTREAM_V1_F32_LE":
             raise ValueError("Unsupported PhiStream format")
         self.config = ModelConfig(**manifest["config"])
+        self.manifest_provenance = manifest.get("provenance", "UNKNOWN")
         expected = self.config.shapes()
         raw_tensors = manifest["tensors"]
         if set(raw_tensors) != set(expected):
