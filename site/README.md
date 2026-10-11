@@ -29,3 +29,5 @@ No secrets or user files are uploaded. GitHub Pages is static. The only runtime 
 The **Local CUDA receipt viewer** under Evidence parses a user-selected V1 receipt entirely in-browser; nothing is sent to a server, stored remotely or published. It labels file-provided numbers explicitly. See [local device-validation instructions](../docs/DEVICE_VALIDATION.md).
 
 The **Local Hardware Intelligence** reader loads either a `PHISTREAM_HARDWARE_SNAPSHOT_V1` or unapproved `PHISTREAM_RESIDENCY_ADVICE_V1` JSON file in-browser. No uploads or device probing occur in the website. Read [Hardware Advisor](../docs/HARDWARE_ADVISOR.md) for the Windows commands.
+
+The **Transfer Laboratory** reader supports local `PHISTREAM_TRANSFER_LAB_V1` receipts, with bounded synthetic-file warm reads, RAM copy and optional synchronized pageable/pinned H2D timing. Files are read directly in the browser; no upload or backend execution. See [Transfer Laboratory](../docs/TRANSFER_LAB.md).

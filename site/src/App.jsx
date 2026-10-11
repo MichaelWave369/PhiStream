@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import DeviceReceipt from './DeviceReceipt.jsx';
 import HardwareReader from './HardwareReader.jsx';
+import TransferReader from './TransferReader.jsx';
 
 const REPO = 'https://github.com/MichaelWave369/PhiStream';
 const MODELS = [
@@ -127,7 +128,7 @@ const STEPS = [
   { index: '01', state: 'COMPLETE', title: 'Independent inference core', text: 'Toy decoder, memory-mapped weights, layer streaming, resident reference, integrity receipts.', status: 'complete' },
   { index: '02', state: 'NEXT', title: 'CUDA verification', text: 'Test numerics, allocator use, and real host-to-device transfers on the RTX 5070.', status: 'next' },
   { index: '03', state: 'EXPERIMENTAL', title: 'Llama token-ID execution', text: 'Local Llama token execution and offline reference-trace comparison; independently authenticated real-model parity is still pending.', status: 'next' },
-  { index: '04', state: 'EXPERIMENTAL', title: 'Hardware-aware advisor', text: 'Local RAM/CUDA/drive capacity snapshots and unapproved model-residency proposals; automatic scheduling and performance validation remain research.', status: 'next' },
+  { index: '04', state: 'EXPERIMENTAL', title: 'Transfer Laboratory', text: 'Repeated scratch-read, host-copy, pageable/pinned CUDA timing receipts; real-model prefetch and adaptive scheduling remain unverified.', status: 'next' },
   { index: '05', state: 'RESEARCH', title: 'Vessie / BrainC integration', text: 'Optional audited inference routing with BudgetGenius cost and speed receipts.', status: 'future' }
 ];
 
@@ -184,6 +185,7 @@ export default function App() {
         <Benchmarks/>
         <DeviceReceipt/>
         <HardwareReader/>
+        <TransferReader/>
       </section>
 
       <section className="section container roadmap-section" id="roadmap">

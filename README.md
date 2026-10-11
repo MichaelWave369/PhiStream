@@ -159,3 +159,20 @@ py -m phistream.cli hardware-snapshot --gpu cuda --drive "C:\" --drive "D:\" --o
 
 See the [Hardware-Aware Advisor](docs/HARDWARE_ADVISOR.md) for optional
 checkpoint-based recommendations and provenance rules.
+
+## Transfer Laboratory: SSD / RAM / CUDA timings (PR #9)
+
+PhiStream has a **bounded synthetic-byte laboratory** for an opt-in
+temporary scratch fixture. It times repeated local file reads, host RAM
+copies, and optional pageable/pinned CUDA host-to-device transfers.
+**No real model, uncached NVMe benchmark, PCIe raw bandwidth or
+adaptive cache is measured.**
+
+```powershell
+py -m phistream.cli transfer-lab --workspace "D:\PhiStream\Experiments" --gpu cuda --size-mib 16 --repeats 5 --output "benchmarks\local\transfer-d-rtx5070.json"
+```
+
+See [Transfer Laboratory safety and evidence guide](docs/TRANSFER_LAB.md).
+The optional GPU mode requires functioning CUDA and never silently falls
+back to CPU. The temporary byte fixture is owned by the process and deleted
+on exit; only your explicitly requested local JSON receipt remains.

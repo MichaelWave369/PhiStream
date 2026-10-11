@@ -42,6 +42,10 @@ jobs:
           python -m phistream.cli hardware-snapshot --help
           python -m phistream.cli recommend-residency --help
           python -m phistream.cli hardware-snapshot > /tmp/phistream-readonly-hardware.json
+      - name: Transfer lab CPU fixture (synthetic and scratch-only)
+        run: |
+          python -m phistream.cli transfer-lab --help
+          python -m phistream.cli transfer-lab --workspace /tmp --gpu none --size-mib 1 --repeats 3 > /tmp/phistream-transfer-cpu.json
       - name: Reproducible synthetic fixture
         run: |
           python -m phistream.cli init-fixture /tmp/phistream-ci-fixture
