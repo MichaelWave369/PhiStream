@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import DeviceReceipt from './DeviceReceipt.jsx';
+import HardwareReader from './HardwareReader.jsx';
 
 const REPO = 'https://github.com/MichaelWave369/PhiStream';
 const MODELS = [
@@ -182,6 +183,7 @@ export default function App() {
         <SectionTitle eyebrow="BENCHMARKS / 03" title="Numbers with a paper trail." description="Real receipts from the repository, and no made-up CUDA results."/>
         <Benchmarks/>
         <DeviceReceipt/>
+        <HardwareReader/>
       </section>
 
       <section className="section container roadmap-section" id="roadmap">
