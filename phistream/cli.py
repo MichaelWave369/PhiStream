@@ -150,6 +150,15 @@ def main() -> None:
     pipeline.add_argument("--repeats", type=int, default=8, help="4-20 paired trials")
     pipeline.add_argument("--warmups", type=int, default=2, help="1-5 warmup trials per method")
     pipeline.add_argument("--output", help="Write new local JSON receipt; refuse overwrite")
+    reuse = sp.add_parser("reuse-lab",
+        help="Compare synthetic pageable/new-pinned/reusable-pinned GPU stages across bounded sizes")
+    reuse.add_argument("--workspace", required=True, help="Existing scratch-only directory")
+    reuse.add_argument("--gpu", choices=["none", "cuda"], default="none")
+    reuse.add_argument("--sizes-mib", default="4,16,64",
+                       help="1–3 unique sizes, 1–128 MiB each and <=192 MiB total")
+    reuse.add_argument("--rounds", type=int, default=6, choices=[6, 12])
+    reuse.add_argument("--warmups", type=int, default=2, help="1–4 per method")
+    reuse.add_argument("--output", help="Create a new local JSON receipt, refuse overwrite")
     args = ap.parse_args()
     if args.command == "init-fixture":
         build_fixture(args.directory, ModelConfig(), args.seed)
@@ -308,6 +317,22 @@ def main() -> None:
             path.parent.mkdir(parents=True, exist_ok=True)
             with path.open("x", encoding="utf-8") as target:
                 target.write(payload)
+        print(payload, end="")
+        return
+    if args.command == "reuse-lab":
+        from pathlib import Path
+        from .reuse import run_reuse_lab
+        result = run_reuse_lab(
+            args.workspace, gpu=args.gpu,
+            sizes_mib=args.sizes_mib,
+            rounds=args.rounds, warmups=args.warmups,
+        )
+        payload = json.dumps(result, indent=2, allow_nan=False) + "\n"
+        if args.output:
+            dest = Path(args.output)
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            with dest.open("x", encoding="utf-8") as fh:
+                fh.write(payload)
         print(payload, end="")
         return
     store = ModelStore(args.directory)

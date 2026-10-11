@@ -33,3 +33,5 @@ The **Local Hardware Intelligence** reader loads either a `PHISTREAM_HARDWARE_SN
 The **Transfer Laboratory** reader supports local `PHISTREAM_TRANSFER_LAB_V1` receipts, with bounded synthetic-file warm reads, RAM copy and optional synchronized pageable/pinned H2D timing. Files are read directly in the browser; no upload or backend execution. See [Transfer Laboratory](../docs/TRANSFER_LAB.md).
 
 The **Paired Pipeline** reader accepts local `PHISTREAM_PIPELINE_LAB_V1` receipts, displaying complete synchronous pageable versus reusable pinned staging times, paired win counts and ratio. Browser-only, no backend. See [Paired Pipeline Lab](../docs/PIPELINE_LAB.md).
+
+The **Reusable Buffer Laboratory** accepts a local `PHISTREAM_REUSE_LAB_V1` JSON receipt, comparing buffer allocation strategies across three synthetic sizes. Browser-only, no upload. See [Reuse Lab](../docs/REUSE_LAB.md).
