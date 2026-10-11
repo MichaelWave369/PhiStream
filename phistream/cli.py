@@ -133,6 +133,14 @@ def main() -> None:
     advisor.add_argument("--output", help="Write new local JSON recommendation, never overwrite")
     advisor.add_argument("--strict", action="store_true",
                          help="Exit 2 for a policy-blocked advisory (never permits execution)")
+    transfer = sp.add_parser("transfer-lab",
+        help="Bounded scratch SSD/host/CUDA transfer timing; no model files used")
+    transfer.add_argument("--workspace", required=True,
+                          help="Existing local directory that permits disposable scratch fixture")
+    transfer.add_argument("--gpu", choices=["none", "cuda"], default="none")
+    transfer.add_argument("--size-mib", type=int, default=16, help="1-256 MiB scratch fixture")
+    transfer.add_argument("--repeats", type=int, default=5, help="3-15 repetitions")
+    transfer.add_argument("--output", help="Save a new local JSON receipt; refuse overwrite")
     args = ap.parse_args()
     if args.command == "init-fixture":
         build_fixture(args.directory, ModelConfig(), args.seed)
@@ -262,6 +270,21 @@ def main() -> None:
         if (args.command == "recommend-residency" and args.strict
                 and receipt["status"] == "BLOCKED_BY_POLICY"):
             raise SystemExit(2)
+        return
+    if args.command == "transfer-lab":
+        from pathlib import Path
+        from .transfer import run_transfer_lab
+        receipt = run_transfer_lab(
+            args.workspace, gpu=args.gpu,
+            size_mib=args.size_mib, repeats=args.repeats,
+        )
+        payload = json.dumps(receipt, indent=2, allow_nan=False) + "\n"
+        if args.output:
+            destination = Path(args.output)
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            with destination.open("x", encoding="utf-8") as out:
+                out.write(payload)
+        print(payload, end="")
         return
     store = ModelStore(args.directory)
     if args.command == "validate-device":

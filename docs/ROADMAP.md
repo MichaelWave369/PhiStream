@@ -56,8 +56,9 @@ model comparison has been run yet. See [reference protocol](REFERENCE_TRACE.md).
 
 **PR #8 advisory candidate:** fresh host RAM + optional CUDA free-memory
 snapshots feed a *read-only*, checkpoint-bound layer-placement **proposal**.
-Neither drive speed nor persistent Llama GPU-cache placement has been
-implemented, and the proposal never authorizes execution. See
+Persistent Llama GPU-cache placement has not been implemented, and the
+proposal never authorizes execution. A separate bounded, cache-uncontrolled
+transfer laboratory now measures synthetic bytes, not model streaming. See
 [hardware advisor](HARDWARE_ADVISOR.md).
 
 
@@ -72,12 +73,19 @@ GPU results have been measured. See [memory preflight](MEMORY_PREFLIGHT.md).
 - [ ] GPU dynamic budget with measured allocator margin, adaptive layer residency and actual OOM recovery
 - [x] Read-only Windows/Linux RAM, opt-in CUDA free VRAM and explicit drive capacity snapshots with metadata-derived, **unapproved** pinned-layer advice (not applied by current executor)
 - [ ] Async staging and prefetch with synchronization correctness tests
+- [x] Controlled scratch file read, host copy and pageable/pinned H2D transfer lab with repeated JSON receipts (OS cache **not** controlled; not a real model benchmark)
 - [ ] Pinned-memory and direct disk-read profiling (OS-dependent)
 - [ ] Residency policy tuned against trace, not speculative NBG claims
 - [ ] Prefill batching, GQA KV budget, quantized storage as optional opt-in
 - [ ] Compare against Ollama/llama.cpp on same exact weights/tokens/hardware
 - [ ] Report TTFT, decode tokens/sec, real peak GPU allocation, RAM, disk reads, errors
 - [ ] Record throughput separately for cold/warm caches and context lengths 128/512/2048
+
+**PR #9 transfer laboratory:** bounded local scratch fixture, repeated
+post-write disk reads, host bytearray copies and CUDA pageable/pinned
+transfers with explicit synchronization and end-to-end staging caution.
+User RTX performance is unmeasured until its local receipt is returned.
+See [transfer laboratory](TRANSFER_LAB.md).
 
 ## Gate D: Vessie integration
 
