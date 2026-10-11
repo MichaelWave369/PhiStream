@@ -70,7 +70,8 @@ def _cpu_trial(path: Path, count: int, digest: str, mode: str, buffer: bytearray
     if copy != data:
         raise RuntimeError("CPU staging differs from fixture")
     return {"total": total, "read": read_seconds, "prepare": prep_seconds,
-            "h2d": None, "pinned_stage": None, "checked": True}
+            "h2d": None, "pinned_stage": None,
+            "pre_h2d_sync": None, "checked": True}
 
 
 def _cuda_environment(count: int):
@@ -109,7 +110,9 @@ def _cuda_trial(path: Path, count: int, digest: str, mode: str, state: dict):
         state["pinned"].copy_(src)
         staging_seconds = time.perf_counter() - t0
         src = state["pinned"]
+    sync_start = time.perf_counter()
     torch.cuda.synchronize()
+    pre_h2d_sync_seconds = time.perf_counter() - sync_start
     copy_start = time.perf_counter()
     state["dest"].copy_(src, non_blocking=False)
     torch.cuda.synchronize()
@@ -125,7 +128,21 @@ def _cuda_trial(path: Path, count: int, digest: str, mode: str, state: dict):
         raise RuntimeError("Pipeline device byte sample mismatch")
     return {"total": total, "read": read_seconds,
             "prepare": prep_seconds, "h2d": h2d_seconds,
-            "pinned_stage": staging_seconds, "checked": True}
+            "pinned_stage": staging_seconds,
+            "pre_h2d_sync": pre_h2d_sync_seconds, "checked": True}
+
+
+def _duration_stats(samples: list[float]) -> dict:
+    """Describe a time interval without inventing a meaningful byte throughput."""
+    if not samples or any(not math.isfinite(x) or x < 0 for x in samples):
+        raise RuntimeError("Time attribution samples must be finite and nonnegative")
+    return {
+        "samples_seconds": [round(x, 9) for x in samples],
+        "median_seconds": round(statistics.median(samples), 9),
+        "min_seconds": round(min(samples), 9),
+        "max_seconds": round(max(samples), 9),
+        "repetitions": len(samples),
+    }
 
 
 def _aggregate(trials: list[dict], size: int, gpu: bool) -> dict:
@@ -136,8 +153,19 @@ def _aggregate(trials: list[dict], size: int, gpu: bool) -> dict:
     }
     if gpu:
         result["h2d"] = _stats([r["h2d"] for r in trials], size)
+        result["pre_h2d_sync"] = _duration_stats([r["pre_h2d_sync"] for r in trials])
         if all(t["pinned_stage"] is not None for t in trials):
             result["pinned_host_stage"] = _stats([r["pinned_stage"] for r in trials], size)
+    # Each trial's reported wall time includes interval gaps between explicit
+    # stage timers, bookkeeping, tensor wrappers and Python dispatch.
+    # Attribute the entire residual *per trial*, never by subtracting medians.
+    residuals = [
+        max(0.0, r["total"] - r["read"] - r["prepare"] -
+            (r["h2d"] or 0) - (r["pinned_stage"] or 0) -
+            (r["pre_h2d_sync"] or 0))
+        for r in trials
+    ]
+    result["unattributed_wall_time"] = _duration_stats(residuals)
     return result
 
 
@@ -188,6 +216,7 @@ def run_pipeline_lab(workspace: str | Path, *, gpu: str = "none",
     ]
     wins = sum(results["pinned"][i]["total"] < results["pageable"][i]["total"]
                for i in range(repeats))
+    paired_median_ratio = statistics.median(ratios)
     return {
         "schema": SCHEMA,
         "status": "PASS_CUDA_PIPELINE" if device else "PASS_CPU_PIPELINE",
@@ -222,8 +251,16 @@ def run_pipeline_lab(workspace: str | Path, *, gpu: str = "none",
         "paired_outcome": {
             "pinned_wins": wins,
             "pageable_wins_or_ties": repeats - wins,
-            "median_pageable_total_over_pinned_total": round(statistics.median(ratios), 5),
-            "interpretation": "Positive speed ratio favors pinned path in THIS controlled scratch experiment only.",
+            "median_pageable_total_over_pinned_total": round(paired_median_ratio, 5),
+            "median_ratio_favors": (
+                "PINNED" if paired_median_ratio > 1 else
+                "PAGEABLE" if paired_median_ratio < 1 else "TIE"
+            ),
+            "interpretation": (
+                "A ratio ABOVE 1.0 favors pinned; BELOW 1.0 favors pageable. "
+                "This is a paired synthetic experiment, not model inference "
+                "or a statistical confidence interval."
+            ),
         },
         "model_execution": False,
         "automatic_layer_placement": False,
@@ -232,6 +269,7 @@ def run_pipeline_lab(workspace: str | Path, *, gpu: str = "none",
             "OS filesystem caching is uncontrolled; file reads are not cold-cache NVMe bandwidth.",
             "Warmups and deterministic balanced order reduce but do not eliminate noise.",
             "GPU wall-clock spans file reads, fresh pageable-buffer creation, optional pinned staging and synchronized H2D.",
+            "Pre-H2D synchronization is now separately timed. Residual wall time includes Python bookkeeping and other uninstrumented gaps.",
             "Reference bytes are hashed outside measured file-read interval; buffers are allocated before the trial.",
             "End-to-end here is one synchronous synthetic stage pipeline, not model token latency.",
             "CPU-only mode compares fresh and reused bytearray staging, not pinned RAM.",

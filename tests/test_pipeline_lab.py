@@ -10,7 +10,7 @@ import unittest
 from unittest.mock import patch
 
 from phistream.pipeline import (
-    SCHEMA, PROVENANCE, balanced_orders, run_pipeline_lab, MIB,
+    SCHEMA, PROVENANCE, balanced_orders, run_pipeline_lab, MIB, _aggregate, _duration_stats,
 )
 
 
@@ -54,6 +54,35 @@ class PipelineLabTests(unittest.TestCase):
         self.assertFalse(r["automatic_layer_placement"])
         self.assertEqual(set(self.folder.iterdir()), before)
         json.dumps(r, allow_nan=False)
+
+    def test_per_trial_residual_is_not_difference_of_medians(self):
+        # Pin staging and pre-transfer CUDA sync are both charged to the full
+        # end-to-end path. Any remaining time must be explicitly disclosed.
+        trials = [
+            {"total": .015, "read": .005, "prepare": .003,
+             "pinned_stage": .002, "pre_h2d_sync": .003, "h2d": .001},
+            {"total": .018, "read": .005, "prepare": .004,
+             "pinned_stage": .003, "pre_h2d_sync": .004, "h2d": .001},
+        ]
+        result = _aggregate(trials, 1048576, True)
+        self.assertEqual(result["unattributed_wall_time"]["samples_seconds"],
+                         [.001, .001])
+        self.assertAlmostEqual(result["pre_h2d_sync"]["median_seconds"], .0035)
+        self.assertAlmostEqual(result["unattributed_wall_time"]["median_seconds"], .001)
+
+    def test_nonnegative_time_accounting_allows_zero_and_rejects_nan(self):
+        self.assertEqual(_duration_stats([0., .1, 0.])["median_seconds"], 0.)
+        with self.assertRaises(RuntimeError):
+            _duration_stats([float("nan")])
+        with self.assertRaises(RuntimeError):
+            _duration_stats([-1.])
+
+    def test_cpu_trials_have_unattributed_timing_without_gpu_fields(self):
+        receipt = run_pipeline_lab(self.folder, size_mib=1, repeats=4, warmups=1)
+        for mode in ("pageable", "pinned"):
+            m = receipt["methods"][mode]["measurements"]
+            self.assertEqual(len(m["unattributed_wall_time"]["samples_seconds"]), 4)
+            self.assertNotIn("pre_h2d_sync", m)
 
     def test_invalid_inputs_no_files(self):
         for kwargs in (

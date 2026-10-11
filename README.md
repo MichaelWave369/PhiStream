@@ -191,3 +191,5 @@ py -m phistream.cli pipeline-lab --workspace "D:\PhiStream\Experiments" --gpu cu
 See [Paired Pipeline Laboratory](docs/PIPELINE_LAB.md). File reads have
 **uncontrolled Windows/OS caching**. This does not benchmark real Llama
 layers, model throughput, asynchronous prefetch or adaptive GPU placement.
+
+Pipeline timing attribution: new V1 receipts also report pre-H2D synchronization and the per-trial **unattributed wall-time** remainder. Above-1 pageable/pinned time ratio favors pinned; below-1 favors pageable. Existing V1 receipts remain valid. See [Pipeline Lab](docs/PIPELINE_LAB.md).
