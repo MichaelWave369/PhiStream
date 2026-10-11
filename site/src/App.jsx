@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import DeviceReceipt from './DeviceReceipt.jsx';
+import HardwareReader from './HardwareReader.jsx';
 
 const REPO = 'https://github.com/MichaelWave369/PhiStream';
 const MODELS = [
@@ -126,7 +127,7 @@ const STEPS = [
   { index: '01', state: 'COMPLETE', title: 'Independent inference core', text: 'Toy decoder, memory-mapped weights, layer streaming, resident reference, integrity receipts.', status: 'complete' },
   { index: '02', state: 'NEXT', title: 'CUDA verification', text: 'Test numerics, allocator use, and real host-to-device transfers on the RTX 5070.', status: 'next' },
   { index: '03', state: 'EXPERIMENTAL', title: 'Llama token-ID execution', text: 'Local Llama token execution and offline reference-trace comparison; independently authenticated real-model parity is still pending.', status: 'next' },
-  { index: '04', state: 'EXPERIMENTAL', title: 'Memory policy preflight', text: 'Metadata-derived VRAM/KV estimates and optional execution refusal; dynamic layer residency remains research, not a proven speedup.', status: 'next' },
+  { index: '04', state: 'EXPERIMENTAL', title: 'Hardware-aware advisor', text: 'Local RAM/CUDA/drive capacity snapshots and unapproved model-residency proposals; automatic scheduling and performance validation remain research.', status: 'next' },
   { index: '05', state: 'RESEARCH', title: 'Vessie / BrainC integration', text: 'Optional audited inference routing with BudgetGenius cost and speed receipts.', status: 'future' }
 ];
 
@@ -182,6 +183,7 @@ export default function App() {
         <SectionTitle eyebrow="BENCHMARKS / 03" title="Numbers with a paper trail." description="Real receipts from the repository, and no made-up CUDA results."/>
         <Benchmarks/>
         <DeviceReceipt/>
+        <HardwareReader/>
       </section>
 
       <section className="section container roadmap-section" id="roadmap">

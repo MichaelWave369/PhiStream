@@ -37,6 +37,11 @@ jobs:
           python -m phistream.cli compare-reference --help
       - name: Memory preflight CLI contract (offline)
         run: python -m phistream.cli plan-memory --help
+      - name: Hardware telemetry and advisory CLI contracts (read-only)
+        run: |
+          python -m phistream.cli hardware-snapshot --help
+          python -m phistream.cli recommend-residency --help
+          python -m phistream.cli hardware-snapshot > /tmp/phistream-readonly-hardware.json
       - name: Reproducible synthetic fixture
         run: |
           python -m phistream.cli init-fixture /tmp/phistream-ci-fixture
