@@ -54,6 +54,10 @@ jobs:
         run: |
           python -m phistream.cli reuse-lab --help
           python -m phistream.cli reuse-lab --workspace /tmp --gpu none --sizes-mib 1 --rounds 6 --warmups 1 > /tmp/phistream-reuse-cpu.json
+      - name: Direct readinto lab CPU fixture and help
+        run: |
+          python -m phistream.cli direct-read-lab --help
+          python -m phistream.cli direct-read-lab --workspace /tmp --gpu none --sizes-mib 1 --rounds 6 --warmups 1 > /tmp/phistream-direct-cpu.json
       - name: Reproducible synthetic fixture
         run: |
           python -m phistream.cli init-fixture /tmp/phistream-ci-fixture

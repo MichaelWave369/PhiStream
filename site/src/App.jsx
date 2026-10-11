@@ -4,6 +4,7 @@ import HardwareReader from './HardwareReader.jsx';
 import TransferReader from './TransferReader.jsx';
 import PipelineReader from './PipelineReader.jsx';
 import ReuseReader from './ReuseReader.jsx';
+import DirectReader from './DirectReader.jsx';
 
 const REPO = 'https://github.com/MichaelWave369/PhiStream';
 const MODELS = [
@@ -190,6 +191,7 @@ export default function App() {
         <TransferReader/>
         <PipelineReader/>
         <ReuseReader/>
+        <DirectReader/>
       </section>
 
       <section className="section container roadmap-section" id="roadmap">

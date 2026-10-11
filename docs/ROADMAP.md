@@ -76,6 +76,7 @@ GPU results have been measured. See [memory preflight](MEMORY_PREFLIGHT.md).
 - [x] Experimental 3-way multi-size pageable/fresh-pinned/reused-pinned CUDA synthetic transfer lab, balanced method ordering, before any real-model scheduler
 - [ ] Async staging and prefetch with synchronization correctness tests
 - [x] Controlled scratch file read, host copy and pageable/pinned H2D transfer lab with repeated JSON receipts (OS cache **not** controlled; not a real model benchmark)
+- [x] Bounded synthetic `file.readinto()` comparison into preallocated pageable/pinned **host tensors**, with balanced sizes, checksum and GPU sample checks (OS cache uncontrolled; no real model)
 - [ ] Pinned-memory and direct disk-read profiling (OS-dependent)
 - [ ] Residency policy tuned against trace, not speculative NBG claims
 - [ ] Prefill batching, GQA KV budget, quantized storage as optional opt-in
@@ -98,6 +99,12 @@ See [transfer laboratory](TRANSFER_LAB.md).
 pinned-host staging for synthetic bytes, whole synchronous file-to-GPU path
 measurement, explicit warmups and stage attribution. OS cache uncontrolled;
 no compute overlap or live model stream. See [pipeline lab](PIPELINE_LAB.md).
+
+**PR #14 Direct-to-Pinned staging:** opt-in synthetic laboratory compares
+multi-copy Python preparation with bounded `file.readinto` into preallocated
+CPU tensors (pageable/pinned), followed by synchronized H2D. CUDA validation
+on the RTX remains to be recorded. This is **not** disk-to-VRAM DMA, cold-cache
+SSD speed or proof of inference acceleration. See [Direct Read Lab](DIRECT_READ_LAB.md).
 
 ## Gate D: Vessie integration
 
