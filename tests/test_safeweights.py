@@ -118,6 +118,18 @@ class SafetensorsTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "symlinks"):
             SafeTensorFile(self.file)
 
+    def test_zero_length_tensor_is_allowed(self):
+        write_st(self.file, {"empty": ("F32", [0, 4], b"")})
+        item = LocalCheckpoint(self.root).tensor("empty")
+        self.assertEqual(item.shape, (0, 4))
+        self.assertEqual(item.numel(), 0)
+
+    def test_malformed_dtype_is_rejected_cleanly(self):
+        header = b'{"x":{"dtype":[],"shape":[1],"data_offsets":[0,4]}}'
+        self.file.write_bytes(struct.pack("<Q", len(header)) + header + floats(1))
+        with self.assertRaisesRegex(ValueError, "dtype"):
+            SafeTensorFile(self.file)
+
     def test_rejects_boolean_dimension(self):
         encoded = json.dumps({"x":{"dtype":"F32","shape":[True],"data_offsets":[0,4]}}).encode()
         self.file.write_bytes(struct.pack("<Q",len(encoded))+encoded+floats(1))
