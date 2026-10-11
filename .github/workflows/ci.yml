@@ -31,6 +31,10 @@ jobs:
       - name: Llama token-ID CLI preflight (no model download)
         run: |
           python -m phistream.cli run-llama-ids --help
+      - name: Offline reference comparison CLI contracts
+        run: |
+          python -m phistream.cli fingerprint-checkpoint --help
+          python -m phistream.cli compare-reference --help
       - name: Reproducible synthetic fixture
         run: |
           python -m phistream.cli init-fixture /tmp/phistream-ci-fixture
