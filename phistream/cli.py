@@ -141,6 +141,15 @@ def main() -> None:
     transfer.add_argument("--size-mib", type=int, default=16, help="1-256 MiB scratch fixture")
     transfer.add_argument("--repeats", type=int, default=5, help="3-15 repetitions")
     transfer.add_argument("--output", help="Save a new local JSON receipt; refuse overwrite")
+    pipeline = sp.add_parser("pipeline-lab",
+        help="Paired synthetic file-to-RAM-to-CUDA wall clock (no model files)")
+    pipeline.add_argument("--workspace", required=True,
+                          help="Existing local directory for exclusive disposable scratch file")
+    pipeline.add_argument("--gpu", choices=["none", "cuda"], default="none")
+    pipeline.add_argument("--size-mib", type=int, default=16, help="1-128 MiB")
+    pipeline.add_argument("--repeats", type=int, default=8, help="4-20 paired trials")
+    pipeline.add_argument("--warmups", type=int, default=2, help="1-5 warmup trials per method")
+    pipeline.add_argument("--output", help="Write new local JSON receipt; refuse overwrite")
     args = ap.parse_args()
     if args.command == "init-fixture":
         build_fixture(args.directory, ModelConfig(), args.seed)
@@ -284,6 +293,21 @@ def main() -> None:
             destination.parent.mkdir(parents=True, exist_ok=True)
             with destination.open("x", encoding="utf-8") as out:
                 out.write(payload)
+        print(payload, end="")
+        return
+    if args.command == "pipeline-lab":
+        from pathlib import Path
+        from .pipeline import run_pipeline_lab
+        result = run_pipeline_lab(
+            args.workspace, gpu=args.gpu, size_mib=args.size_mib,
+            repeats=args.repeats, warmups=args.warmups,
+        )
+        payload = json.dumps(result, indent=2, allow_nan=False) + "\n"
+        if args.output:
+            path = Path(args.output)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            with path.open("x", encoding="utf-8") as target:
+                target.write(payload)
         print(payload, end="")
         return
     store = ModelStore(args.directory)
