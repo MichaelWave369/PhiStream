@@ -249,3 +249,13 @@ py -m phistream.cli guarded-scheduler --receipt-glob "benchmarks\local\overlap-8
 ```
 
 An independently and explicitly operator-approved **scratch-only** CUDA trial can select double buffering when the gate and current GPU preflight pass, or hold/fallback to single. It includes a deliberately serialized same-worker negative control. This is NOT automated production routing. See [Guarded Scheduler](docs/GUARDED_SCHEDULER.md) for opt-in syntax, hard limits and exclusions.
+
+## PR #18 · Synthetic Scheduler Qualification
+
+An offline, read-only `qualify-scheduler` command classifies the **entire supplied** guarded-run cohort as `REJECTED`, `INCONCLUSIVE`, or `QUALIFIED_SYNTHETIC`. It checks original CUDA approval, per-trial samples and control medians, complete GPU replay claims, timestamps, identity, duplicates, 5%/75% per-run and pooled thresholds, and at least three balanced randomized control-order runs for positive qualification. The four existing RTX 5070 guarded receipts include a 4.97% borderline run and deterministic order, so the strict baseline should be **INCONCLUSIVE**. They stay in the ledger.
+
+```powershell
+py -m phistream.cli qualify-scheduler --receipt-glob "benchmarks\local\guarded-double-*.json" --output "benchmarks\local\qualification-baseline.json"
+```
+
+Only explicitly operator-approved synthetic double experiments may optionally use `--randomize-control-order` with a seeded, recorded three-versus-three balanced shuffled negative-control order. **Neither classification nor this flag changes the real model scheduler**. See [Qualification Lab](docs/QUALIFICATION_LAB.md).

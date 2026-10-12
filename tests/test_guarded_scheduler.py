@@ -195,6 +195,50 @@ class GuardedTests(unittest.TestCase):
         # No scratch file survives.
         self.assertEqual(sorted(p.name for p in self.root.glob("phistream-guarded-*")), [])
 
+    def test_balanced_randomized_control_never_changes_production(self):
+        evidence=review_receipts(self.cohort())
+        class FakeCuda:
+            def replay_audit(self,*a):
+                return {"full_sha256_host_and_gpu_audit":True,
+                        "audit_chunks":8,"audit_is_outside_timing":True}
+        calls=[]
+        def fake_trial(path, chunk_bytes, chunks, method, backend, worker,
+                       serialize_worker=False):
+            calls.append("CONTROL" if serialize_worker else "DOUBLE")
+            return {"elapsed_seconds":0.01 if not serialize_worker else 0.012}
+        with patch("phistream.guarded._local_cuda_check",
+                   return_value=(True,"MOCK_MATCHED")):
+            with patch("phistream.guarded._CudaBackend",return_value=FakeCuda()):
+                with patch("phistream.guarded._fixture") as fixture:
+                    fixture.side_effect=lambda path,*args:(
+                        hashlib.sha256(b"").hexdigest(),["a"]*8,path.touch() or 0)
+                    with patch("phistream.guarded._trial",side_effect=fake_trial):
+                        with patch("phistream.guarded.secrets.randbits",return_value=369):
+                            data=run_synthetic_guarded(
+                                self.root,evidence,request_double=True,
+                                approve_synthetic_double=True,
+                                randomize_control_order=True)
+        rand=data["order_randomization"]
+        self.assertEqual(rand["mode"],"BALANCED_SHUFFLE")
+        self.assertEqual(rand["seed"],369)
+        self.assertEqual(sum(rand["control_first_per_trial"]),3)
+        self.assertEqual(len(rand["control_first_per_trial"]),6)
+        self.assertEqual(data["selected_mode"],"double_reuse_worker")
+        self.assertFalse(data["production_policy_applied"])
+        # First two invocations are warmups, followed by the predeclared
+        # shuffled order of each six-round control/experiment pair.
+        main_calls=calls[2:]
+        for i,control_first in enumerate(rand["control_first_per_trial"]):
+            pair=main_calls[i*2:i*2+2]
+            self.assertEqual(pair,["CONTROL","DOUBLE"] if control_first
+                             else ["DOUBLE","CONTROL"])
+
+    def test_randomized_control_needs_explicit_double_approval(self):
+        evidence=review_receipts(self.cohort())
+        with self.assertRaisesRegex(ValueError,"requires approved synthetic"):
+            run_synthetic_guarded(self.root,evidence,
+                                  randomize_control_order=True)
+
     def test_cli_review_only_does_not_call_cuda(self):
         from phistream.cli import main
         self.cohort()
