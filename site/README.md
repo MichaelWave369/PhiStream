@@ -51,3 +51,5 @@ The **Real-Checkpoint Bridge** browser-only JSON reader shows read-only prefligh
 A local-only **HF Reference Trace** reader presents the separately generated 32-token external-runtime trace and checkpoint binding. Neither importing the JSON nor looking at a reference is proof PhiStream matches it. See [External Reference Lab](../docs/EXTERNAL_REFERENCE_LAB.md).
 
 The read-only real-weight matrix panel accepts a local four-case review summary JSON. Its displayed status is **user-local and not authenticated by the browser**. The offline Python reviewer checks evidence binding; see [operator protocol](../docs/REAL_WEIGHT_MATRIX.md).
+
+The offline weight staging audit accepts a user-local receipt and visualizes the SHA-bound four-case counter identity. It does **not** execute a model, authenticate the provided JSON, or claim achieved acceleration. See [method and limits](../docs/WEIGHT_STAGE_AUDIT.md).

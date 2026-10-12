@@ -83,6 +83,9 @@ jobs:
         run: |
           python -m scripts.real_weight_matrix plan --help
           python -m scripts.real_weight_matrix review --help
+      - name: SHA-bound weight staging audit CLI (offline, no inference)
+        run: |
+          python -m scripts.weight_stage_audit --help
       - name: Reproducible synthetic fixture
         run: |
           python -m phistream.cli init-fixture /tmp/phistream-ci-fixture
