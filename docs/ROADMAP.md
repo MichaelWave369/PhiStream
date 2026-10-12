@@ -76,6 +76,7 @@ GPU results have been measured. See [memory preflight](MEMORY_PREFLIGHT.md).
 - [x] Experimental 3-way multi-size pageable/fresh-pinned/reused-pinned CUDA synthetic transfer lab, balanced method ordering, before any real-model scheduler
 - [x] Synthetic single- vs double-buffer pinned H2D experiment, CUDA completion-event ownership checks, balanced wall-clock receipts and full out-of-band GPU replay SHA audit (no model compute)
 - [x] Synthetic CPU-host timeline and worker-reuse experiment with predeclared 5%/75% evidence gate; not cross-clock GPU overlap proof
+- [x] Read-only multi-receipt synthetic evidence gate (three 12-round RTX cohorts), explicit scratch-only CUDA double opt-in, conservative single fallback and forced-serial negative control; NO model activation
 - [ ] Async staging and prefetch with synchronization correctness tests
 - [x] Controlled scratch file read, host copy and pageable/pinned H2D transfer lab with repeated JSON receipts (OS cache **not** controlled; not a real model benchmark)
 - [x] Bounded synthetic `file.readinto()` comparison into preallocated pageable/pinned **host tensors**, with balanced sizes, checksum and GPU sample checks (OS cache uncontrolled; no real model)
@@ -116,6 +117,14 @@ enqueue/completion-observation intervals, and marks insufficient improvements
 INCONCLUSIVE. GPU events are a separate, **uncalibrated** clock domain; no
 true physical I/O/GPU overlap or inference-speed improvement claim. See
 [Overlap Lab](OVERLAP_LAB.md).
+
+**PR #17 Guarded Scheduler candidate:** 3 independent 12-round synthetic
+CUDA receipts, matching platform/PyTorch/GPU identity, raw sample/policy
+arithmetic checks and full out-of-band SHA attestations (still user-provided
+and unauthenticated). Explicit separate operator flag can enable an owned
+scratch-only double-buffer experiment with same-worker serialization
+negative control. Default SINGLE; production mode never changed.
+See [guarded scheduler contract](GUARDED_SCHEDULER.md).
 
 ## Gate D: Vessie integration
 

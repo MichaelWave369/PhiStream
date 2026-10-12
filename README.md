@@ -239,3 +239,13 @@ py -m phistream.cli overlap-lab --workspace "D:\PhiStream\Experiments" --gpu cud
 ```
 
 See [Overlap Lab](docs/OVERLAP_LAB.md). No automatic scheduler or real model weights are accessed.
+
+## Guarded Synthetic Scheduler (PR #17)
+
+PhiStream now has a **review-only, local** gate for repeated RTX 5070 Overlap Intelligence receipts. Three independent full 12-round, same-hardware 8 MiB × 8 synthetic CUDA receipts must pass both individual and pooled 5%/75% gates. Results remain **unauthenticated, synthetic, default SINGLE**, with no change to Ollama, Vessie or model weights.
+
+```powershell
+py -m phistream.cli guarded-scheduler --receipt-glob "benchmarks\local\overlap-8m8-repeat-*.json" --output "benchmarks\local\guarded-review-rtx5070.json"
+```
+
+An independently and explicitly operator-approved **scratch-only** CUDA trial can select double buffering when the gate and current GPU preflight pass, or hold/fallback to single. It includes a deliberately serialized same-worker negative control. This is NOT automated production routing. See [Guarded Scheduler](docs/GUARDED_SCHEDULER.md) for opt-in syntax, hard limits and exclusions.

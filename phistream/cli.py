@@ -185,6 +185,19 @@ def main() -> None:
     overlap.add_argument("--rounds", type=int, choices=[6, 12], default=6)
     overlap.add_argument("--warmups", type=int, default=1, help="1–3 per method")
     overlap.add_argument("--output", help="Create new JSON receipt, never overwrite")
+    guarded = sp.add_parser("guarded-scheduler",
+        help="Offline receipt gate and explicit scratch-only CUDA scheduler prototype")
+    guarded.add_argument("--receipt-glob", required=True,
+                         help="Local nonrecursive glob, preferably overlap-8m8-repeat-*.json")
+    guarded.add_argument("--run-synthetic", action="store_true",
+                         help="Run bounded CUDA scratch test; otherwise REVIEW ONLY")
+    guarded.add_argument("--workspace",
+                         help="Existing scratch-only folder, required with --run-synthetic")
+    guarded.add_argument("--request-double", action="store_true",
+                         help="Request synthetic double; never changes production policy")
+    guarded.add_argument("--approve-synthetic-double", action="store_true",
+                         help="Explicit operator consent for synthetic CUDA double path")
+    guarded.add_argument("--output", help="Create new local JSON receipt, never overwrite")
     args = ap.parse_args()
     if args.command == "init-fixture":
         build_fixture(args.directory, ModelConfig(), args.seed)
@@ -410,6 +423,35 @@ def main() -> None:
             dest.parent.mkdir(parents=True, exist_ok=True)
             with dest.open("x", encoding="utf-8") as handle:
                 handle.write(payload)
+        print(payload, end="")
+        return
+    if args.command == "guarded-scheduler":
+        from pathlib import Path
+        from .guarded import find_receipts, review_receipts, run_synthetic_guarded
+        if args.request_double and not args.run_synthetic:
+            ap.error("--request-double requires --run-synthetic")
+        if args.approve_synthetic_double and not args.request_double:
+            ap.error("--approve-synthetic-double requires --request-double")
+        if args.run_synthetic and not args.workspace:
+            ap.error("--run-synthetic requires an existing --workspace")
+        destination = Path(args.output) if args.output else None
+        if destination is not None and destination.exists():
+            raise FileExistsError(f"Receipt already exists: {destination}")
+        evidence = review_receipts(find_receipts(args.receipt_glob))
+        if args.run_synthetic:
+            result = run_synthetic_guarded(
+                args.workspace, evidence,
+                request_double=args.request_double,
+                approve_synthetic_double=args.approve_synthetic_double,
+            )
+            result["gate_summary"] = evidence
+        else:
+            result = evidence
+        payload = json.dumps(result, indent=2, allow_nan=False) + "\n"
+        if destination is not None:
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            with destination.open("x", encoding="utf-8") as output:
+                output.write(payload)
         print(payload, end="")
         return
     store = ModelStore(args.directory)
