@@ -47,3 +47,5 @@ The **Guarded Scheduler** reader accepts only local review receipts (`PHISTREAM_
 The offline **Scheduler Qualification** reader accepts a local `PHISTREAM_SCHEDULER_QUALIFICATION_V1` JSON report and shows every included guarded synthetic receipt, pass/hold evidence, randomized controls, and reasons for REJECTED/INCONCLUSIVE/QUALIFIED_SYNTHETIC. No files upload or GPU policy changes. See [Qualification Lab](../docs/QUALIFICATION_LAB.md).
 
 The **Real-Checkpoint Bridge** browser-only JSON reader shows read-only preflight status, Llama architecture metadata, model execution/parity steps when explicitly provided, decoder measurements and separate source/license declaration warnings. It does not upload checkpoint weights or activate a scheduler. See [Real Model Bridge](../docs/REAL_MODEL_BRIDGE.md).
+
+A local-only **HF Reference Trace** reader presents the separately generated 32-token external-runtime trace and checkpoint binding. Neither importing the JSON nor looking at a reference is proof PhiStream matches it. See [External Reference Lab](../docs/EXTERNAL_REFERENCE_LAB.md).
