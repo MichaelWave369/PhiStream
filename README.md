@@ -229,3 +229,13 @@ py -m phistream.cli chunk-lab --workspace "D:\PhiStream\Experiments" --gpu cuda 
 ```
 
 See [Chunked Streaming Laboratory](docs/CHUNK_LAB.md). Output collisions are checked before benchmarking and file creation remains exclusive. Local scratch is temporary; receipts never upload automatically.
+
+## Overlap Intelligence (PR #16)
+
+An opt-in synthetic benchmark measures **serial buffering**, **a newly created background worker per trial**, and **a reusable persistent worker** with separately reported startup cost and event-guarded buffer ownership. Per-chunk CPU host timelines disclose read, worker queue, enqueue, and observed CUDA completion intervals, but they are NOT calibrated GPU execution timelines. An evidence gate keeps the single-buffer default and reports INCONCLUSIVE for small or inconsistent gains.
+
+```powershell
+py -m phistream.cli overlap-lab --workspace "D:\PhiStream\Experiments" --gpu cuda --chunk-mib 8 --chunks 8 --rounds 6 --warmups 1 --output "benchmarks\local\overlap-8m8-rtx5070.json"
+```
+
+See [Overlap Lab](docs/OVERLAP_LAB.md). No automatic scheduler or real model weights are accessed.
