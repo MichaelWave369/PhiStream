@@ -7,6 +7,7 @@ import ReuseReader from './ReuseReader.jsx';
 import DirectReader from './DirectReader.jsx';
 import ChunkReader from './ChunkReader.jsx';
 import OverlapReader from './OverlapReader.jsx';
+import GuardedReader from './GuardedReader.jsx';
 
 const REPO = 'https://github.com/MichaelWave369/PhiStream';
 const MODELS = [
@@ -196,6 +197,7 @@ export default function App() {
         <DirectReader/>
         <ChunkReader/>
         <OverlapReader/>
+        <GuardedReader/>
       </section>
 
       <section className="section container roadmap-section" id="roadmap">

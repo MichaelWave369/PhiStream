@@ -66,6 +66,9 @@ jobs:
         run: |
           python -m phistream.cli overlap-lab --help
           python -m phistream.cli overlap-lab --workspace /tmp --gpu none --chunk-mib 1 --chunks 4 --rounds 6 --warmups 1 > /tmp/phistream-overlap-cpu.json
+      - name: Guarded scheduler offline receipt-only CLI contract
+        run: |
+          python -m phistream.cli guarded-scheduler --help
       - name: Reproducible synthetic fixture
         run: |
           python -m phistream.cli init-fixture /tmp/phistream-ci-fixture

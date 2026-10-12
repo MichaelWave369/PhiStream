@@ -78,11 +78,14 @@ def recommend(single: list[float], reused: list[float], *, gpu: bool) -> dict:
 
 
 def _trial(path: Path, chunk_bytes: int, chunks: int, method: str,
-           backend, permanent: ThreadPoolExecutor | None = None) -> dict:
+           backend, permanent: ThreadPoolExecutor | None = None,
+           serialize_worker: bool = False) -> dict:
     if method not in METHODS:
         raise ValueError("Unrecognized overlap method")
     if method == "double_reuse_worker" and permanent is None:
         raise ValueError("Persistent worker required")
+    if serialize_worker and method != "double_reuse_worker":
+        raise ValueError("Serialization control requires a persistent double worker")
 
     active = [None, None]
     timings = [None] * chunks
@@ -166,6 +169,10 @@ def _trial(path: Path, chunk_bytes: int, chunks: int, method: str,
                     row["read_start_ms"] - ms(queued), 6
                 ))
                 submit(index, slot, row)
+                if serialize_worker:
+                    # Explicit negative control: complete current H2D BEFORE
+                    # the worker is allowed to read the next chunk.
+                    drain(slot)
                 if index + 1 < chunks:
                     next_slot = (index + 1) % 2
                     drain(next_slot)

@@ -41,3 +41,5 @@ The new **Direct Staging Laboratory** reader accepts local `PHISTREAM_DIRECT_REA
 The **Chunked Streaming** panel accepts local `PHISTREAM_CHUNK_PIPELINE_V1` receipts comparing single pinned and double pinned CUDA event-guarded chunk streams. The renderer reads local JSON in-browser without uploading it. See [Chunk Lab](../docs/CHUNK_LAB.md).
 
 The browser-only **Overlap Intelligence** panel reads local `PHISTREAM_OVERLAP_LAB_V1` receipts and displays the persistent worker host timeline and conservative advisory without changing scheduler policy. See [Overlap Lab](../docs/OVERLAP_LAB.md).
+
+The **Guarded Scheduler** reader accepts only local review receipts (`PHISTREAM_GUARDED_SCHEDULER_V1`) or explicitly executed synthetic CUDA reports (`PHISTREAM_GUARDED_SYNTHETIC_RUN_V1`). The website performs no approvals, CUDA execution, routing changes or uploads. See [Guarded Scheduler](../docs/GUARDED_SCHEDULER.md).
