@@ -52,6 +52,17 @@ model comparison has been run yet. See [reference protocol](REFERENCE_TRACE.md).
 - [x] No model weights bundled, uploaded or redistributed by preflight
 - [ ] Verify source licenses for selected real models and local privacy
 
+**PR #19 Governed Real-Checkpoint Bridge Phase 1:** single entry-point
+read-only metadata preflight for explicitly selected canonical Llama
+safetensors, source/license/revision declarations, memory-policy review,
+optional full SHA-256 and reference-trace shape inspection. Opt-in >=32-step
+greedy/sparse-logit parity execution requires a separate authorization and
+full shard/config fingerprint match to a user-supplied reference. Decoder-only
+timing and per-step peak CUDA allocated observations included. This
+is **not** independent source/license authentication, official model parity,
+real-model double-buffer activation, tokenizer or benchmark superiority.
+See [Real Checkpoint Bridge](REAL_MODEL_BRIDGE.md).
+
 ## Gate C: measured performance (beat baseline **or do not claim victory**)
 
 **PR #8 advisory candidate:** fresh host RAM + optional CUDA free-memory

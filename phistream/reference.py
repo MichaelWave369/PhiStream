@@ -13,6 +13,7 @@ import json
 import math
 from pathlib import Path
 import re
+import time
 from typing import Any
 
 import torch
@@ -161,6 +162,7 @@ def compare_reference(
     # Before invoking the decoder, require identical complete file hashes.
     if actual_fp["files"] != expected_fp:
         raise ValueError("Checkpoint fingerprint mismatch: do not compare different weights")
+    execution_start = time.perf_counter()
     engine = StreamingLlama(checkpoint, device=device, max_tensor_mib=max_tensor_mib,
                             head_rows=head_rows)
     prompt = validated["prompt"]
@@ -173,8 +175,24 @@ def compare_reference(
     matched_probes = 0
     max_delta = 0.0
     worst_step = None
+    first_logits_seconds = None
+    per_step_seconds = []
+    peak_cuda_allocated_bytes = None
     for i, expected in enumerate(reference_ids):
+        step_start = time.perf_counter()
         logits = engine.step(supplied_token)
+        # The executor already synchronizes each load; explicitly synchronize
+        # at the end of CUDA step to bound the compute duration as well.
+        if engine.device.type == "cuda":
+            torch.cuda.synchronize(engine.device)
+        finished = time.perf_counter()
+        per_step_seconds.append(finished - step_start)
+        if i == 0:
+            first_logits_seconds = finished - execution_start
+        if engine.last_peak_cuda_allocated is not None:
+            peak_cuda_allocated_bytes = max(
+                peak_cuda_allocated_bytes or 0, int(engine.last_peak_cuda_allocated)
+            )
         greedy = int(torch.argmax(logits).item())
         token_match = greedy == expected
         if token_match:
@@ -200,6 +218,7 @@ def compare_reference(
         })
         # Teacher forcing preserves matching positions after an earlier mismatch.
         supplied_token = expected
+    execution_total_seconds = time.perf_counter() - execution_start
     all_tokens = matched_tokens == len(reference_ids)
     total_probes = sum(len(v) for v in validated["probes"])
     all_probes = matched_probes == total_probes
@@ -226,6 +245,23 @@ def compare_reference(
         "worst_probe_step": worst_step,
         "atol": validated["atol"], "rtol": validated["rtol"],
         "comparisons": comparisons,
+        "performance": {
+            "measurement_scope": "DECODER_ONLY_EXCLUDES_CHECKPOINT_SHA_AND_TRACE_VALIDATION",
+            "total_with_engine_setup_seconds": round(execution_total_seconds, 6),
+            "time_to_first_logits_including_prompt_seconds": round(first_logits_seconds, 6),
+            "subsequent_step_seconds": [round(x, 6) for x in per_step_seconds[1:]],
+            "subsequent_decode_tokens_per_second": (
+                round((len(per_step_seconds)-1) / sum(per_step_seconds[1:]), 6)
+                if len(per_step_seconds) > 1 and sum(per_step_seconds[1:]) > 0
+                else None
+            ),
+            "max_observed_cuda_allocated_bytes_per_step": peak_cuda_allocated_bytes,
+            "weight_load_count": engine.weight_load_count,
+            "weight_bytes_staged_total": engine.weight_bytes_staged,
+            "weight_load_seconds_including_transfers": round(engine.weight_load_seconds, 6),
+            "prefill_definition": "includes initialization, prompt processing and first-token logits; not prefill-only throughput",
+            "no_reference_speedup_claim": True,
+        },
         "logit_coverage": "SPARSE_COORDINATES_ONLY",
         "independent_reference_authenticated": False,
         "verification_claim": (

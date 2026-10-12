@@ -73,6 +73,9 @@ jobs:
         run: |
           python -m phistream.cli qualify-scheduler --help
           python -m phistream.cli guarded-scheduler --help
+      - name: Governed local real-model bridge preflight CLI help (no model)
+        run: |
+          python -m phistream.cli real-model-gate --help
       - name: Reproducible synthetic fixture
         run: |
           python -m phistream.cli init-fixture /tmp/phistream-ci-fixture
