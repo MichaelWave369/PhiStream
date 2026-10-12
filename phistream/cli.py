@@ -176,6 +176,15 @@ def main() -> None:
     chunk.add_argument("--repeats", type=int, default=6, help="4,6,8 balanced trial rounds")
     chunk.add_argument("--warmups", type=int, default=1, help="1–3 warmups per method")
     chunk.add_argument("--output", help="New local JSON receipt; never overwrite")
+    overlap = sp.add_parser("overlap-lab",
+        help="Local synthetic host timeline / persistent worker experiment, no model files")
+    overlap.add_argument("--workspace", required=True, help="Existing local scratch directory")
+    overlap.add_argument("--gpu", choices=["none", "cuda"], default="none")
+    overlap.add_argument("--chunk-mib", type=int, default=8, help="1/2/4/8/16 MiB")
+    overlap.add_argument("--chunks", type=int, default=8, help="4–32, total <=256 MiB")
+    overlap.add_argument("--rounds", type=int, choices=[6, 12], default=6)
+    overlap.add_argument("--warmups", type=int, default=1, help="1–3 per method")
+    overlap.add_argument("--output", help="Create new JSON receipt, never overwrite")
     args = ap.parse_args()
     if args.command == "init-fixture":
         build_fixture(args.directory, ModelConfig(), args.seed)
@@ -384,6 +393,23 @@ def main() -> None:
             dest.parent.mkdir(parents=True, exist_ok=True)
             with dest.open("x", encoding="utf-8") as output:
                 output.write(payload)
+        print(payload, end="")
+        return
+    if args.command == "overlap-lab":
+        from pathlib import Path
+        from .overlap import run_overlap_lab
+        dest = Path(args.output) if args.output else None
+        if dest is not None and dest.exists():
+            raise FileExistsError(f"Receipt already exists: {dest}")
+        report = run_overlap_lab(
+            args.workspace, gpu=args.gpu, chunk_mib=args.chunk_mib,
+            chunks=args.chunks, rounds=args.rounds, warmups=args.warmups,
+        )
+        payload = json.dumps(report, indent=2, allow_nan=False) + "\n"
+        if dest is not None:
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            with dest.open("x", encoding="utf-8") as handle:
+                handle.write(payload)
         print(payload, end="")
         return
     store = ModelStore(args.directory)

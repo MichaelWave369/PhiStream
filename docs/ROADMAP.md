@@ -75,6 +75,7 @@ GPU results have been measured. See [memory preflight](MEMORY_PREFLIGHT.md).
 - [x] Bounded paired sequential file → host → CUDA pipeline timing with warmups, balanced ordering and whole-path wall-clock receipts (no model tensors)
 - [x] Experimental 3-way multi-size pageable/fresh-pinned/reused-pinned CUDA synthetic transfer lab, balanced method ordering, before any real-model scheduler
 - [x] Synthetic single- vs double-buffer pinned H2D experiment, CUDA completion-event ownership checks, balanced wall-clock receipts and full out-of-band GPU replay SHA audit (no model compute)
+- [x] Synthetic CPU-host timeline and worker-reuse experiment with predeclared 5%/75% evidence gate; not cross-clock GPU overlap proof
 - [ ] Async staging and prefetch with synchronization correctness tests
 - [x] Controlled scratch file read, host copy and pageable/pinned H2D transfer lab with repeated JSON receipts (OS cache **not** controlled; not a real model benchmark)
 - [x] Bounded synthetic `file.readinto()` comparison into preallocated pageable/pinned **host tensors**, with balanced sizes, checksum and GPU sample checks (OS cache uncontrolled; no real model)
@@ -108,6 +109,13 @@ on the RTX remains to be recorded. This is **not** disk-to-VRAM DMA, cold-cache
 SSD speed or proof of inference acceleration. See [Direct Read Lab](DIRECT_READ_LAB.md).
 
 **PR #15 (bounded streaming candidate):** a background scratch-file `readinto` can be scheduled while CUDA H2D is pending, with event synchronization **before slot reuse**. Buffered tests are measured by complete wall-clock time; pending events do not prove real overlap. No model weights, GPU computation, cold-cache disk reads, or autonomous prefetch. See [chunked lab](CHUNK_LAB.md).
+
+**PR #16 Overlap Intelligence:** new bounded local scratch test compares single,
+new-worker and persistent-worker strategies, measures host-clock read/queue/
+enqueue/completion-observation intervals, and marks insufficient improvements
+INCONCLUSIVE. GPU events are a separate, **uncalibrated** clock domain; no
+true physical I/O/GPU overlap or inference-speed improvement claim. See
+[Overlap Lab](OVERLAP_LAB.md).
 
 ## Gate D: Vessie integration
 
