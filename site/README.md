@@ -49,3 +49,5 @@ The offline **Scheduler Qualification** reader accepts a local `PHISTREAM_SCHEDU
 The **Real-Checkpoint Bridge** browser-only JSON reader shows read-only preflight status, Llama architecture metadata, model execution/parity steps when explicitly provided, decoder measurements and separate source/license declaration warnings. It does not upload checkpoint weights or activate a scheduler. See [Real Model Bridge](../docs/REAL_MODEL_BRIDGE.md).
 
 A local-only **HF Reference Trace** reader presents the separately generated 32-token external-runtime trace and checkpoint binding. Neither importing the JSON nor looking at a reference is proof PhiStream matches it. See [External Reference Lab](../docs/EXTERNAL_REFERENCE_LAB.md).
+
+The read-only real-weight matrix panel accepts a local four-case review summary JSON. Its displayed status is **user-local and not authenticated by the browser**. The offline Python reviewer checks evidence binding; see [operator protocol](../docs/REAL_WEIGHT_MATRIX.md).

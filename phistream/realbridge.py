@@ -15,7 +15,7 @@ import time
 from .llama import LlamaSettings
 from .memory import memory_preflight
 from .reference import (
-    checkpoint_fingerprint, compare_reference, read_reference_trace,
+    _hash_file, checkpoint_fingerprint, compare_reference, read_reference_trace,
     validate_reference_trace,
 )
 from .safeweights import LocalCheckpoint
@@ -77,8 +77,14 @@ def evaluate_real_checkpoint(
 
     trace = None
     validated = None
+    trace_sha256 = None
     if trace_path is not None:
+        # Bind the parsed reference bytes to this receipt. Check before and
+        # after parsing to catch accidental replacement during the read.
+        trace_sha256 = _hash_file(Path(trace_path))
         trace = read_reference_trace(trace_path)
+        if _hash_file(Path(trace_path)) != trace_sha256:
+            raise ValueError("Reference trace changed while being parsed")
         validated = validate_reference_trace(trace, ckpt)
     if execute_parity and len(validated["expected_ids"]) < 32:
         raise ValueError("Real-model parity needs at least 32 independent-reference token steps")
@@ -131,6 +137,7 @@ def evaluate_real_checkpoint(
                 validated["origin"]["asserted_independent"] if validated else None
             ),
             "independence_authenticated": False,
+            "trace_sha256": trace_sha256,
         },
         "memory_preflight": plan,
         "checkpoint_fingerprint": None,
@@ -170,6 +177,8 @@ def evaluate_real_checkpoint(
         ckpt, trace, device=device, max_tensor_mib=max_tensor_mib,
         head_rows=head_rows,
     )
+    if _hash_file(Path(trace_path)) != trace_sha256:
+        raise ValueError("Reference trace changed during parity execution")
     elapsed = time.perf_counter() - start
     report["checkpoint_fingerprint"] = result["checkpoint_fingerprint"]
     report["execution"] = result

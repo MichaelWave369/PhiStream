@@ -11,6 +11,7 @@ import GuardedReader from './GuardedReader.jsx';
 import QualificationReader from './QualificationReader.jsx';
 import RealBridgeReader from './RealBridgeReader.jsx';
 import HFReferenceReader from './HFReferenceReader.jsx';
+import RealMatrixReader from './RealMatrixReader.jsx';
 
 const REPO = 'https://github.com/MichaelWave369/PhiStream';
 const MODELS = [
@@ -204,6 +205,7 @@ export default function App() {
         <QualificationReader/>
         <RealBridgeReader/>
         <HFReferenceReader/>
+        <RealMatrixReader/>
       </section>
 
       <section className="section container roadmap-section" id="roadmap">
