@@ -45,3 +45,5 @@ The browser-only **Overlap Intelligence** panel reads local `PHISTREAM_OVERLAP_L
 The **Guarded Scheduler** reader accepts only local review receipts (`PHISTREAM_GUARDED_SCHEDULER_V1`) or explicitly executed synthetic CUDA reports (`PHISTREAM_GUARDED_SYNTHETIC_RUN_V1`). The website performs no approvals, CUDA execution, routing changes or uploads. See [Guarded Scheduler](../docs/GUARDED_SCHEDULER.md).
 
 The offline **Scheduler Qualification** reader accepts a local `PHISTREAM_SCHEDULER_QUALIFICATION_V1` JSON report and shows every included guarded synthetic receipt, pass/hold evidence, randomized controls, and reasons for REJECTED/INCONCLUSIVE/QUALIFIED_SYNTHETIC. No files upload or GPU policy changes. See [Qualification Lab](../docs/QUALIFICATION_LAB.md).
+
+The **Real-Checkpoint Bridge** browser-only JSON reader shows read-only preflight status, Llama architecture metadata, model execution/parity steps when explicitly provided, decoder measurements and separate source/license declaration warnings. It does not upload checkpoint weights or activate a scheduler. See [Real Model Bridge](../docs/REAL_MODEL_BRIDGE.md).

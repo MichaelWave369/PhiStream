@@ -205,6 +205,29 @@ def main() -> None:
     qualify.add_argument("--receipt-glob", required=True,
                          help="Local nonrecursive glob, e.g. guarded-double-*.json")
     qualify.add_argument("--output", help="Exclusive new local JSON report")
+    bridge = sp.add_parser("real-model-gate",
+        help="Read-only real Llama safetensors preflight; separately approved >=32-step reference parity")
+    bridge.add_argument("location", help="Explicit local canonical Llama safetensors directory/file")
+    bridge.add_argument("--capacity-mib", type=float, required=True,
+                        help="Memory scenario/policy in MiB; no hard fit guarantee")
+    bridge.add_argument("--reserve-mib", type=float, default=1024)
+    bridge.add_argument("--context-tokens", type=int, default=40,
+                        help="Preflight context if no reference trace supplied")
+    bridge.add_argument("--device", choices=["scenario", "cpu", "cuda"],
+                        default="scenario")
+    bridge.add_argument("--max-tensor-mib", type=int, default=512)
+    bridge.add_argument("--head-rows", type=int, default=128)
+    bridge.add_argument("--source", help="User-declared original model source (not verified)")
+    bridge.add_argument("--revision", help="User-declared exact checkpoint revision")
+    bridge.add_argument("--license-id", help="User-declared license identifier (not verified)")
+    bridge.add_argument("--trace", help="Local user-declared independent reference JSON")
+    bridge.add_argument("--hash-checkpoint", action="store_true",
+                        help="Explicitly SHA256 entire checkpoint, can take time")
+    bridge.add_argument("--execute-parity", action="store_true",
+                        help="Request real checkpoint execution only against >=32-step reference")
+    bridge.add_argument("--approve-local-execution", action="store_true",
+                        help="Separate operator consent required to execute a real model")
+    bridge.add_argument("--output", help="Create a new local JSON receipt, never overwrite")
     args = ap.parse_args()
     if args.command == "init-fixture":
         build_fixture(args.directory, ModelConfig(), args.seed)
@@ -478,6 +501,31 @@ def main() -> None:
             with dest.open("x", encoding="utf-8") as handle:
                 handle.write(payload)
         print(payload, end="")
+        return
+    if args.command == "real-model-gate":
+        from pathlib import Path
+        from .realbridge import evaluate_real_checkpoint
+        dest = Path(args.output) if args.output else None
+        if dest is not None and dest.exists():
+            raise FileExistsError(f"Receipt already exists: {dest}")
+        report = evaluate_real_checkpoint(
+            args.location, capacity_mib=args.capacity_mib,
+            reserve_mib=args.reserve_mib, context_tokens=args.context_tokens,
+            device=args.device, max_tensor_mib=args.max_tensor_mib,
+            head_rows=args.head_rows, source=args.source,
+            revision=args.revision, license_id=args.license_id,
+            trace_path=args.trace, hash_checkpoint=args.hash_checkpoint,
+            execute_parity=args.execute_parity,
+            approve_local_execution=args.approve_local_execution,
+        )
+        payload = json.dumps(report, indent=2, allow_nan=False) + "\n"
+        if dest is not None:
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            with dest.open("x", encoding="utf-8") as output:
+                output.write(payload)
+        print(payload, end="")
+        if report["status"] in ("PARITY_MISMATCH", "HELD_MEMORY_POLICY"):
+            raise SystemExit(2)
         return
     store = ModelStore(args.directory)
     if args.command == "validate-device":

@@ -259,3 +259,13 @@ py -m phistream.cli qualify-scheduler --receipt-glob "benchmarks\local\guarded-d
 ```
 
 Only explicitly operator-approved synthetic double experiments may optionally use `--randomize-control-order` with a seeded, recorded three-versus-three balanced shuffled negative-control order. **Neither classification nor this flag changes the real model scheduler**. See [Qualification Lab](docs/QUALIFICATION_LAB.md).
+
+## PR #19 · Governed Real-Checkpoint Bridge (Phase 1)
+
+PhiStream's existing strictly canonical Llama safetensors decoder, metadata memory plan, full SHA fingerprint and user-provided independent reference comparator are now under one conservative `real-model-gate` CLI. **Default is read-only metadata review**. The run needs a named local checkpoint, explicit source/revision/license declaration, a separate >=32-step reference trace, a passing *estimate-only* memory gate and independent operator approval. Execution binds every shard's full SHA256 to the reference *before decoding*.
+
+```powershell
+py -m phistream.cli real-model-gate "C:\PATH\TO\EXISTING\LLAMA_SAFETENSORS" --capacity-mib 8192 --reserve-mib 1024 --device scenario
+```
+
+When separately approved and actually run, the comparator reports time-to-first logits including prompt, subsequent teacher-forced rate, staged bytes, and CUDA PyTorch allocation observations. **No real pretrained checkpoint has yet been measured**, and no specific model is supplied by this repo. The reference identity/license is user-asserted, not authenticated. No downloads, tokenizer, GGUF/Ollama integration, synthetic double buffer in the real decoder, or production scheduling changes. Full opt-in procedure: [Real Checkpoint Bridge](docs/REAL_MODEL_BRIDGE.md).

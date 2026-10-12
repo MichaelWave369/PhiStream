@@ -9,6 +9,7 @@ import ChunkReader from './ChunkReader.jsx';
 import OverlapReader from './OverlapReader.jsx';
 import GuardedReader from './GuardedReader.jsx';
 import QualificationReader from './QualificationReader.jsx';
+import RealBridgeReader from './RealBridgeReader.jsx';
 
 const REPO = 'https://github.com/MichaelWave369/PhiStream';
 const MODELS = [
@@ -200,6 +201,7 @@ export default function App() {
         <OverlapReader/>
         <GuardedReader/>
         <QualificationReader/>
+        <RealBridgeReader/>
       </section>
 
       <section className="section container roadmap-section" id="roadmap">
