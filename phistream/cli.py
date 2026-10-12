@@ -167,6 +167,15 @@ def main() -> None:
     direct.add_argument("--rounds", type=int, default=6, choices=[6, 12])
     direct.add_argument("--warmups", type=int, default=2, help="1–4 per method")
     direct.add_argument("--output", help="Create local receipt file, never overwrite")
+    chunk = sp.add_parser("chunk-lab",
+        help="Synthetic pinned single-vs-double buffered CUDA chunk pipeline")
+    chunk.add_argument("--workspace", required=True, help="Existing local scratch-only directory")
+    chunk.add_argument("--gpu", choices=["none", "cuda"], default="none")
+    chunk.add_argument("--chunk-mib", type=int, default=4, help="1,2,4,8 or 16 MiB")
+    chunk.add_argument("--chunks", type=int, default=16, help="4–32; fixture <=256 MiB")
+    chunk.add_argument("--repeats", type=int, default=6, help="4,6,8 balanced trial rounds")
+    chunk.add_argument("--warmups", type=int, default=1, help="1–3 warmups per method")
+    chunk.add_argument("--output", help="New local JSON receipt; never overwrite")
     args = ap.parse_args()
     if args.command == "init-fixture":
         build_fixture(args.directory, ModelConfig(), args.seed)
@@ -356,6 +365,25 @@ def main() -> None:
             dest.parent.mkdir(parents=True, exist_ok=True)
             with dest.open("x", encoding="utf-8") as target:
                 target.write(payload)
+        print(payload, end="")
+        return
+    if args.command == "chunk-lab":
+        from pathlib import Path
+        from .chunklab import run_chunk_lab
+        dest = Path(args.output) if args.output else None
+        # Fail early on known collisions, while open("x") below still
+        # preserves exclusive no-overwrite semantics against races.
+        if dest is not None and dest.exists():
+            raise FileExistsError(f"Receipt already exists: {dest}")
+        result = run_chunk_lab(
+            args.workspace, gpu=args.gpu, chunk_mib=args.chunk_mib,
+            chunks=args.chunks, repeats=args.repeats, warmups=args.warmups,
+        )
+        payload = json.dumps(result, indent=2, allow_nan=False) + "\n"
+        if dest is not None:
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            with dest.open("x", encoding="utf-8") as output:
+                output.write(payload)
         print(payload, end="")
         return
     store = ModelStore(args.directory)
