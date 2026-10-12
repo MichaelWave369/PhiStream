@@ -197,7 +197,14 @@ def main() -> None:
                          help="Request synthetic double; never changes production policy")
     guarded.add_argument("--approve-synthetic-double", action="store_true",
                          help="Explicit operator consent for synthetic CUDA double path")
+    guarded.add_argument("--randomize-control-order", action="store_true",
+                         help="Only with explicitly approved synthetic double run; 3/3 balanced shuffled control order")
     guarded.add_argument("--output", help="Create new local JSON receipt, never overwrite")
+    qualify = sp.add_parser("qualify-scheduler",
+        help="Read-only, local qualification of ALL matching guarded synthetic receipts")
+    qualify.add_argument("--receipt-glob", required=True,
+                         help="Local nonrecursive glob, e.g. guarded-double-*.json")
+    qualify.add_argument("--output", help="Exclusive new local JSON report")
     args = ap.parse_args()
     if args.command == "init-fixture":
         build_fixture(args.directory, ModelConfig(), args.seed)
@@ -428,6 +435,9 @@ def main() -> None:
     if args.command == "guarded-scheduler":
         from pathlib import Path
         from .guarded import find_receipts, review_receipts, run_synthetic_guarded
+        if args.randomize_control_order and not (args.run_synthetic
+                and args.request_double and args.approve_synthetic_double):
+            ap.error("--randomize-control-order requires --run-synthetic, --request-double and --approve-synthetic-double")
         if args.request_double and not args.run_synthetic:
             ap.error("--request-double requires --run-synthetic")
         if args.approve_synthetic_double and not args.request_double:
@@ -443,6 +453,7 @@ def main() -> None:
                 args.workspace, evidence,
                 request_double=args.request_double,
                 approve_synthetic_double=args.approve_synthetic_double,
+                randomize_control_order=args.randomize_control_order,
             )
             result["gate_summary"] = evidence
         else:
@@ -452,6 +463,20 @@ def main() -> None:
             destination.parent.mkdir(parents=True, exist_ok=True)
             with destination.open("x", encoding="utf-8") as output:
                 output.write(payload)
+        print(payload, end="")
+        return
+    if args.command == "qualify-scheduler":
+        from pathlib import Path
+        from .qualification import find_guarded_receipts, qualify_guarded
+        dest = Path(args.output) if args.output else None
+        if dest is not None and dest.exists():
+            raise FileExistsError(f"Receipt already exists: {dest}")
+        report = qualify_guarded(find_guarded_receipts(args.receipt_glob))
+        payload = json.dumps(report, indent=2, allow_nan=False) + "\n"
+        if dest is not None:
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            with dest.open("x", encoding="utf-8") as handle:
+                handle.write(payload)
         print(payload, end="")
         return
     store = ModelStore(args.directory)

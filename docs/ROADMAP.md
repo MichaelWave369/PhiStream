@@ -126,6 +126,12 @@ scratch-only double-buffer experiment with same-worker serialization
 negative control. Default SINGLE; production mode never changed.
 See [guarded scheduler contract](GUARDED_SCHEDULER.md).
 
+**PR #18 Qualification candidate:** read-only full guarded receipt census including
+borderline 4.97% run; three conservative statuses; minimum three balanced
+randomized-order experiments before synthetic qualification; no runtime
+promotion. Explicit-only synthetic CUDA control-order shuffle; default
+single buffering. See [Qualification Lab](QUALIFICATION_LAB.md).
+
 ## Gate D: Vessie integration
 
 - [ ] Optional, default-off local process with allowlisted model path

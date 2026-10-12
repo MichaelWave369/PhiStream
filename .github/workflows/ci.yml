@@ -69,6 +69,10 @@ jobs:
       - name: Guarded scheduler offline receipt-only CLI contract
         run: |
           python -m phistream.cli guarded-scheduler --help
+      - name: Scheduler qualification offline CLI help and randomization contract
+        run: |
+          python -m phistream.cli qualify-scheduler --help
+          python -m phistream.cli guarded-scheduler --help
       - name: Reproducible synthetic fixture
         run: |
           python -m phistream.cli init-fixture /tmp/phistream-ci-fixture

@@ -12,6 +12,8 @@ import glob
 import hashlib
 import json
 import math
+import random
+import secrets
 from pathlib import Path
 import platform
 import shutil
@@ -261,10 +263,14 @@ def _local_cuda_check(evidence: dict, chunk_bytes: int) -> tuple[bool, str]:
 def run_synthetic_guarded(workspace: str | Path, evidence: dict, *,
                           request_double: bool = False,
                           approve_synthetic_double: bool = False,
-                          rounds: int = 6, warmups: int = 1) -> dict:
+                          rounds: int = 6, warmups: int = 1,
+                          randomize_control_order: bool = False) -> dict:
     """Only temporary owned bytes. Single is guaranteed default/held fallback."""
-    if type(request_double) is not bool or type(approve_synthetic_double) is not bool:
+    if (type(request_double) is not bool or type(approve_synthetic_double) is not bool
+            or type(randomize_control_order) is not bool):
         raise ValueError("Explicit boolean approvals required")
+    if randomize_control_order and not (request_double and approve_synthetic_double):
+        raise ValueError("Control randomization requires approved synthetic double buffering")
     _check_parameters(SHAPE[0], SHAPE[1], 6, warmups)
     if type(rounds) is not int or rounds != 6:
         raise ValueError("Prototype uses exactly six synthetic observation rounds")
@@ -294,6 +300,12 @@ def run_synthetic_guarded(workspace: str | Path, evidence: dict, *,
     backend = _CudaBackend(chunk_bytes)
     values = []
     control = []
+    # Balanced randomization is decided BEFORE any timed trials, never
+    # selected according to observed performance. Seed is preserved.
+    seed = secrets.randbits(64) if randomize_control_order and use_double else None
+    control_first = [True, False] * 3
+    if seed is not None:
+        random.Random(seed).shuffle(control_first)
     # Keep everything in private owned temp directory; no checkpoint paths.
     began = datetime.now(timezone.utc).isoformat()
     with tempfile.TemporaryDirectory(prefix="phistream-guarded-", dir=root) as tmp:
@@ -308,15 +320,17 @@ def run_synthetic_guarded(workspace: str | Path, evidence: dict, *,
                            "double_reuse_worker", backend, worker,
                            serialize_worker=True)
             for i in range(rounds):
-                # Approved double is measured alongside a same-worker
-                # deliberately serialized negative control. Alternate order.
-                if use_double and i%2==0:
+                # Negative control uses the SAME worker and buffers but
+                # waits for every H2D before the following read. Three
+                # control-first and three double-first trials, optionally
+                # shuffled using a recorded seed.
+                if use_double and control_first[i]:
                     control.append(_trial(filename, chunk_bytes, SHAPE[1],
                                    "double_reuse_worker", backend, worker,
                                    serialize_worker=True)["elapsed_seconds"])
                 values.append(_trial(filename, chunk_bytes, SHAPE[1], chosen,
                                      backend, worker)["elapsed_seconds"])
-                if use_double and i%2==1:
+                if use_double and not control_first[i]:
                     control.append(_trial(filename, chunk_bytes, SHAPE[1],
                                    "double_reuse_worker", backend, worker,
                                    serialize_worker=True)["elapsed_seconds"])
@@ -339,6 +353,11 @@ def run_synthetic_guarded(workspace: str | Path, evidence: dict, *,
         "selected_end_to_end":_duration(values),
         "serialized_same_worker_negative_control":_duration(control) if control else None,
         "control_is_deliberately_nonoverlapping":True if control else False,
+        "order_randomization": ({
+            "mode": ("BALANCED_SHUFFLE" if seed is not None else "DETERMINISTIC_ALTERNATION"),
+            "seed": seed,
+            "control_first_per_trial": control_first,
+        } if use_double else None),
         "integrity":audit, "temporary_scratch_deleted":True,
         "model_execution":False, "production_policy_applied":False,
         "automatic_layer_placement":False,
