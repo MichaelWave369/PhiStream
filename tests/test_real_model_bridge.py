@@ -59,6 +59,9 @@ class RealCheckpointBridgeTests(unittest.TestCase):
         self.assertEqual(len(result["checkpoint_fingerprint"]["files"]),2)
         self.assertFalse(result["model_execution"])
         self.assertFalse(result["user_asserted_source"]["verified_by_phistream"])
+        from phistream.reference import _hash_file
+        self.assertEqual(result["reference_trace"]["trace_sha256"],
+                         _hash_file(self.trace_path))
 
     def test_approved_cpu_parity_32_steps_still_unverified_independence(self):
         result=evaluate_real_checkpoint(self.model, **self.kw,
@@ -132,6 +135,18 @@ class RealCheckpointBridgeTests(unittest.TestCase):
                     device="cpu", trace_path=self.trace_path,
                     execute_parity=True,approve_local_execution=True,
                     source="local",revision="r1",license_id="SYNTH")
+
+    def test_trace_mutation_during_comparison_refused(self):
+        def corrupt_after_start(*args, **kwargs):
+            self.trace_path.write_text(self.trace_path.read_text() + " ")
+            return {"status":"MATCH_USER_REFERENCE_UNVERIFIED"}
+        with patch("phistream.realbridge.compare_reference",
+                   side_effect=corrupt_after_start):
+            with self.assertRaisesRegex(ValueError,"changed during parity execution"):
+                evaluate_real_checkpoint(self.model,**self.kw,
+                    device="cpu",trace_path=self.trace_path,
+                    execute_parity=True,approve_local_execution=True,
+                    source="local",revision="v1",license_id="TEST")
 
     def test_variant_rope_refused_before_memory_or_execution(self):
         cfg=json.loads((self.model/"config.json").read_text())

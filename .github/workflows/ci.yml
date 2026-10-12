@@ -79,6 +79,10 @@ jobs:
       - name: Offline external reference exporter CLI contract (no Transformers import)
         run: |
           python scripts/export_hf_reference.py --help
+      - name: Four-case offline real-weight matrix CLI contracts (no inference)
+        run: |
+          python -m scripts.real_weight_matrix plan --help
+          python -m scripts.real_weight_matrix review --help
       - name: Reproducible synthetic fixture
         run: |
           python -m phistream.cli init-fixture /tmp/phistream-ci-fixture

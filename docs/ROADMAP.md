@@ -152,6 +152,21 @@ randomized-order experiments before synthetic qualification; no runtime
 promotion. Explicit-only synthetic CUDA control-order shuffle; default
 single buffering. See [Qualification Lab](QUALIFICATION_LAB.md).
 
+### PR #21: Four-case real-weight validation matrix (awaiting user execution)
+
+The user locally recorded one SmolLM2-135M-Instruct reference parity run:
+32/32 teacher-forced greedy IDs and 288/288 sparse probes on RTX 5070,
+with 29/32 greedy outputs repeating ID 32. This is a genuine one-sequence
+comparison against a user-declared external runtime, not broad correctness.
+A four-case additional prompt-length/token-ID matrix is now defined, with
+each reference trace bound by its SHA256 into a new real-model-gate receipt.
+Operator-approved local execution is still required separately for each
+reference and parity run. CI mocks inputs and verifies fail-closed ledger
+logic, not any actual pretrained weights. Four-case results, model-aware
+double buffering, performance speedup, all-logit parity, tokenizer support
+and production readiness are **not yet demonstrated**. See
+[the matrix operator protocol](REAL_WEIGHT_MATRIX.md).
+
 ## Gate D: Vessie integration
 
 - [ ] Optional, default-off local process with allowlisted model path
