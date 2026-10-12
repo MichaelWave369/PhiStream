@@ -37,3 +37,5 @@ The **Paired Pipeline** reader accepts local `PHISTREAM_PIPELINE_LAB_V1` receipt
 The **Reusable Buffer Laboratory** accepts a local `PHISTREAM_REUSE_LAB_V1` JSON receipt, comparing buffer allocation strategies across three synthetic sizes. Browser-only, no upload. See [Reuse Lab](../docs/REUSE_LAB.md).
 
 The new **Direct Staging Laboratory** reader accepts local `PHISTREAM_DIRECT_READ_LAB_V1` receipts. It compares the legacy multi-copy path, direct pageable `file.readinto`, and direct pinned `file.readinto` across synthetic sizes; it never uploads files or runs device code. See [Direct Read Lab](../docs/DIRECT_READ_LAB.md).
+
+The **Chunked Streaming** panel accepts local `PHISTREAM_CHUNK_PIPELINE_V1` receipts comparing single pinned and double pinned CUDA event-guarded chunk streams. The renderer reads local JSON in-browser without uploading it. See [Chunk Lab](../docs/CHUNK_LAB.md).

@@ -58,6 +58,10 @@ jobs:
         run: |
           python -m phistream.cli direct-read-lab --help
           python -m phistream.cli direct-read-lab --workspace /tmp --gpu none --sizes-mib 1 --rounds 6 --warmups 1 > /tmp/phistream-direct-cpu.json
+      - name: Chunked event scheduler CPU-only scratch simulation
+        run: |
+          python -m phistream.cli chunk-lab --help
+          python -m phistream.cli chunk-lab --workspace /tmp --gpu none --chunk-mib 1 --chunks 4 --repeats 4 --warmups 1 > /tmp/phistream-chunk-cpu.json
       - name: Reproducible synthetic fixture
         run: |
           python -m phistream.cli init-fixture /tmp/phistream-ci-fixture

@@ -219,3 +219,13 @@ py -m phistream.cli direct-read-lab --workspace "D:\PhiStream\Experiments" --gpu
 ```
 
 See [Direct Read Lab](docs/DIRECT_READ_LAB.md). Nothing uploads automatically; the scratch fixture is temporary.
+
+## Chunked double-buffer streaming experiment (PR #15)
+
+A bounded, opt-in `chunk-lab` compares sequential pinned CPU → CUDA transfers with **two alternating pinned CPU buffers**, a background next-chunk read and CUDA completion-event ownership checks. Both methods preallocate two host and two GPU buffers, but only the double path attempts to overlap background file reads with pending H2D transfers. Local JSON includes separate full-SHA256 host/GPU replay audit **outside** benchmark timing. No real model, GPU compute overlap, GPUDirect Storage or uncached SSD read claim.
+
+```powershell
+py -m phistream.cli chunk-lab --workspace "D:\PhiStream\Experiments" --gpu cuda --chunk-mib 4 --chunks 16 --repeats 6 --warmups 1 --output "benchmarks\local\chunk-4m16-rtx5070.json"
+```
+
+See [Chunked Streaming Laboratory](docs/CHUNK_LAB.md). Output collisions are checked before benchmarking and file creation remains exclusive. Local scratch is temporary; receipts never upload automatically.

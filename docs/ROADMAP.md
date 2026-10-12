@@ -74,6 +74,7 @@ GPU results have been measured. See [memory preflight](MEMORY_PREFLIGHT.md).
 - [x] Read-only Windows/Linux RAM, opt-in CUDA free VRAM and explicit drive capacity snapshots with metadata-derived, **unapproved** pinned-layer advice (not applied by current executor)
 - [x] Bounded paired sequential file → host → CUDA pipeline timing with warmups, balanced ordering and whole-path wall-clock receipts (no model tensors)
 - [x] Experimental 3-way multi-size pageable/fresh-pinned/reused-pinned CUDA synthetic transfer lab, balanced method ordering, before any real-model scheduler
+- [x] Synthetic single- vs double-buffer pinned H2D experiment, CUDA completion-event ownership checks, balanced wall-clock receipts and full out-of-band GPU replay SHA audit (no model compute)
 - [ ] Async staging and prefetch with synchronization correctness tests
 - [x] Controlled scratch file read, host copy and pageable/pinned H2D transfer lab with repeated JSON receipts (OS cache **not** controlled; not a real model benchmark)
 - [x] Bounded synthetic `file.readinto()` comparison into preallocated pageable/pinned **host tensors**, with balanced sizes, checksum and GPU sample checks (OS cache uncontrolled; no real model)
@@ -105,6 +106,8 @@ multi-copy Python preparation with bounded `file.readinto` into preallocated
 CPU tensors (pageable/pinned), followed by synchronized H2D. CUDA validation
 on the RTX remains to be recorded. This is **not** disk-to-VRAM DMA, cold-cache
 SSD speed or proof of inference acceleration. See [Direct Read Lab](DIRECT_READ_LAB.md).
+
+**PR #15 (bounded streaming candidate):** a background scratch-file `readinto` can be scheduled while CUDA H2D is pending, with event synchronization **before slot reuse**. Buffered tests are measured by complete wall-clock time; pending events do not prove real overlap. No model weights, GPU computation, cold-cache disk reads, or autonomous prefetch. See [chunked lab](CHUNK_LAB.md).
 
 ## Gate D: Vessie integration
 
