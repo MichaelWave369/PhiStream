@@ -167,6 +167,22 @@ double buffering, performance speedup, all-logit parity, tokenizer support
 and production readiness are **not yet demonstrated**. See
 [the matrix operator protocol](REAL_WEIGHT_MATRIX.md).
 
+### PR #22: read-only weight stage counter audit (operator receipts pending)
+
+The user-reported 4-case SmolLM2 real-weight matrix matched 128/128
+greedy IDs and 1,147/1,147 sampled logits. Existing single-token
+streaming timings reveal 8.61 to 14.80 GB cumulative weight staging
+with 9.83 to 16.14 seconds observed decoder duration, and about 82%
+of that time within the broad weight-loading timer. Every extra
+prompt token adds exactly 269,030,016 staged bytes, the checkpoint
+payload: clear structural evidence of repeated model streaming
+during serial-token prefill. The offline PR22 audit binds prior
+receipt hashes and verifies the byte/load-count identity, with
+no new model execution. CPU CI uses synthetic mocks only.
+Potential causal batched-prefill savings remain a hypothesis requiring
+new parity, memory and randomized timing evidence; scheduler SINGLE
+remains unchanged. See [weight staging audit](WEIGHT_STAGE_AUDIT.md).
+
 ## Gate D: Vessie integration
 
 - [ ] Optional, default-off local process with allowlisted model path
