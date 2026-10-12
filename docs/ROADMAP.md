@@ -63,6 +63,15 @@ is **not** independent source/license authentication, official model parity,
 real-model double-buffer activation, tokenizer or benchmark superiority.
 See [Real Checkpoint Bridge](REAL_MODEL_BRIDGE.md).
 
+**PR #20 External Reference Laboratory:** independent installed Hugging Face
+Transformers is used only as an external offline reference runtime,
+not integrated into PhiStream. Default hash-only check of pinned checkpoint,
+with separately approved 32-step full-sequence greedy/sparse-logit trace,
+before another explicit PhiStream single-buffer comparison. User-declared
+provenance remains unauthenticated. No real SmolLM2 parity has been observed
+in CI, nor real-model double-buffer performance. See
+[External Reference Lab](EXTERNAL_REFERENCE_LAB.md).
+
 ## Gate C: measured performance (beat baseline **or do not claim victory**)
 
 **PR #8 advisory candidate:** fresh host RAM + optional CUDA free-memory
