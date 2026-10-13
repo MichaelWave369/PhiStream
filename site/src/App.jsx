@@ -13,6 +13,7 @@ import RealBridgeReader from './RealBridgeReader.jsx';
 import HFReferenceReader from './HFReferenceReader.jsx';
 import RealMatrixReader from './RealMatrixReader.jsx';
 import WeightStageReader from './WeightStageReader.jsx';
+import PairedResearch from './PairedResearch.jsx';
 
 const REPO = 'https://github.com/MichaelWave369/PhiStream';
 const MODELS = [
@@ -130,16 +131,16 @@ function Benchmarks() {
       <ReceiptCard label="STREAMED WEIGHT LOADS" value={receipts ? fmt(receipts.stream.weight_load_events) : '—'} foot="Load events in synthetic CPU fixture" icon="layers" />
       <ReceiptCard label="RESIDENT WEIGHT LOADS" value={receipts ? fmt(receipts.resident.weight_load_events) : '—'} foot="Same fixture, resident execution" icon="database" />
       <ReceiptCard label="PARITY CHECK" value="0.0" foot="Reported maximum logit diff on CPU fixture" icon="check" accent="accent-green" />
-      <ReceiptCard label="GPU BENCHMARK" value="PENDING" foot="RTX 5070 validation not yet measured" icon="cpu" accent="accent-amber" />
+      <ReceiptCard label="REAL-WEIGHT A/B" value="SEE RESEARCH" foot="See the user-local RTX 5070 paired research section" icon="cpu" accent="accent-amber" />
     </div>
   </div>;
 }
 
 const STEPS = [
   { index: '01', state: 'COMPLETE', title: 'Independent inference core', text: 'Toy decoder, memory-mapped weights, layer streaming, resident reference, integrity receipts.', status: 'complete' },
-  { index: '02', state: 'NEXT', title: 'CUDA verification', text: 'Test numerics, allocator use, and real host-to-device transfers on the RTX 5070.', status: 'next' },
-  { index: '03', state: 'EXPERIMENTAL', title: 'Llama token-ID execution', text: 'Local Llama token execution and offline reference-trace comparison; independently authenticated real-model parity is still pending.', status: 'next' },
-  { index: '04', state: 'EXPERIMENTAL', title: 'Transfer Laboratory', text: 'Repeated scratch-read, host-copy, pageable/pinned CUDA timing receipts; real-model prefetch and adaptive scheduling remain unverified.', status: 'next' },
+  { index: '02', state: 'REVIEW', title: 'Narrow RTX 5070 real-model evidence', text: 'Three user-local real-weight prompt cases passed 32-step parity and paired timing review; model-wide GPU readiness remains unestablished.', status: 'complete' },
+  { index: '03', state: 'EXPERIMENTAL', title: 'Llama token-ID execution', text: 'Locally approved safetensors Llama execution with checked user-declared external traces; source provenance and broader model coverage remain unverified.', status: 'next' },
+  { index: '04', state: 'NEXT', title: 'Cross-day replication and larger contexts', text: 'An eight-pair spread_24 replication is planned with seed 70421. Longer prompt ranges, VRAM and other GPUs still need separate controlled evidence.', status: 'next' },
   { index: '05', state: 'RESEARCH', title: 'Vessie / BrainC integration', text: 'Optional audited inference routing with BudgetGenius cost and speed receipts.', status: 'future' }
 ];
 
@@ -150,7 +151,7 @@ export default function App() {
     <div className="ambient ambient-a"/><div className="ambient ambient-b"/>
     <header className="site-header"><div className="container header-inner">
       <a href={import.meta.env.BASE_URL} aria-label="PhiStream homepage"><Logo/></a>
-      <nav aria-label="Main navigation">{[['overview','Overview'],['architecture','Architecture'],['evidence','Evidence'],['roadmap','Roadmap']].map(([id,label])=><button key={id} type="button" className={menu===id ? 'nav-link selected':'nav-link'} onClick={()=>navigate(id)}>{label}</button>)}</nav>
+      <nav aria-label="Main navigation">{[['overview','Overview'],['architecture','Architecture'],['research','Research'],['evidence','Evidence'],['roadmap','Roadmap']].map(([id,label])=><button key={id} type="button" className={menu===id ? 'nav-link selected':'nav-link'} onClick={()=>navigate(id)}>{label}</button>)}</nav>
       <a className="header-github" href={REPO} target="_blank" rel="noreferrer"><Icon name="github" size={18}/><span>GitHub</span><Icon name="external" size={13}/></a>
     </div></header>
 
@@ -160,8 +161,8 @@ export default function App() {
           <div className="hero-label"><span className="pulse-indicator"/> OPEN RESEARCH <span className="slash">/</span> V0.1.0 EXPERIMENTAL</div>
           <h1>Big models.<br/><span>Smaller footprint.</span><br/>Real receipts.</h1>
           <p>ΦStream explores memory-tiered inference: moving model layers through limited GPU memory, measuring every tradeoff, and keeping claims accountable to evidence.</p>
-          <div className="hero-buttons"><button type="button" className="primary-button" onClick={()=>navigate('planner')}>Explore capacity <Icon name="arrow" size={18}/></button><a href={REPO} target="_blank" rel="noreferrer" className="secondary-button"><Icon name="github" size={18}/> View source</a></div>
-          <div className="hero-disclaimer"><Icon name="shield" size={16}/><span>CPU prototype verified · Real-model support not yet available · No 70B performance claim</span></div>
+          <div className="hero-buttons"><button type="button" className="primary-button" onClick={()=>navigate('research')}>See real-model evidence <Icon name="arrow" size={18}/></button><a href={REPO} target="_blank" rel="noreferrer" className="secondary-button"><Icon name="github" size={18}/> View source</a></div>
+          <div className="hero-disclaimer"><Icon name="shield" size={16}/><span>Synthetic CPU parity and narrow RTX 5070 real-model comparisons · No general speedup claim</span></div>
         </div>
         <div className="hero-visual" aria-label="Conceptual layer streaming visualization">
           <div className="orbit orbit-outer"/><div className="orbit orbit-mid"/><div className="orbit orbit-inner"/>
@@ -191,8 +192,13 @@ export default function App() {
         <Planner/>
       </section>
 
+      <section className="section container" id="research">
+        <SectionTitle eyebrow="REAL-MODEL RESEARCH / 03" title="A performance hypothesis with receipts." description="Three frozen RTX 5070 workloads, full reference checks and a reviewed local evidence census. No global speedup claim."/>
+        <PairedResearch/>
+      </section>
+
       <section className="section container" id="evidence">
-        <SectionTitle eyebrow="BENCHMARKS / 03" title="Numbers with a paper trail." description="Real receipts from the repository, and no made-up CUDA results."/>
+        <SectionTitle eyebrow="BENCHMARKS / 04" title="Numbers with a paper trail." description="Synthetic CPU fixture receipts and separate user-local CUDA evidence readers, clearly labeled by provenance."/>
         <Benchmarks/>
         <DeviceReceipt/>
         <HardwareReader/>
@@ -211,11 +217,11 @@ export default function App() {
       </section>
 
       <section className="section container roadmap-section" id="roadmap">
-        <SectionTitle eyebrow="WHAT'S NEXT / 04" title="Built in stages. Verified at each one." description="Experimental milestones with deliberately honest status labels."/>
+        <SectionTitle eyebrow="WHAT'S NEXT / 05" title="Built in stages. Verified at each one." description="Experimental milestones with deliberately honest status labels."/>
         <div className="roadmap-list">{STEPS.map(step=><div className="roadmap-item" key={step.index}><span className={'step-index '+ step.status}>{step.index}</span><div className="step-content"><div className="step-title-row"><h3>{step.title}</h3><span className={'step-state '+step.status}>{step.state}</span></div><p>{step.text}</p></div><Icon name="chevron" size={17}/></div>)}</div>
       </section>
 
-      <section className="cta container"><div className="cta-panel"><span className="eyebrow">OPEN SOURCE / OPEN EVIDENCE</span><h2>Build the engine.<br/><span>Measure the truth.</span></h2><p>Explore the independently developed Python source, reproduce the synthetic fixture tests, and follow the road toward real CUDA validation.</p><div className="cta-links"><a href={REPO} target="_blank" rel="noreferrer" className="primary-button">Explore on GitHub <Icon name="external" size={17}/></a><a href={REPO + '/blob/main/docs/ROADMAP.md'} target="_blank" rel="noreferrer" className="text-link">Read research roadmap <Icon name="arrow" size={16}/></a></div></div></section>
+      <section className="cta container"><div className="cta-panel"><span className="eyebrow">OPEN SOURCE / OPEN EVIDENCE</span><h2>Build the engine.<br/><span>Measure the truth.</span></h2><p>Explore independent Python source, reproduce synthetic fixture tests, and inspect the narrowly scoped user-local real-model evidence before attempting your own offline trials.</p><div className="cta-links"><a href={REPO} target="_blank" rel="noreferrer" className="primary-button">Explore on GitHub <Icon name="external" size={17}/></a><a href={REPO + '/blob/main/docs/ROADMAP.md'} target="_blank" rel="noreferrer" className="text-link">Read research roadmap <Icon name="arrow" size={16}/></a></div></div></section>
     </main>
     <footer className="footer"><div className="container footer-inner"><Logo/><div><p>© 2026 ΦStream · MichaelWave369 · MIT Licensed</p><p>Research prototype. All capacity forecasts are illustrative, not measured GPU performance.</p></div><a href={REPO} target="_blank" rel="noreferrer"><Icon name="github" size={20}/></a></div></footer>
   </div>;
