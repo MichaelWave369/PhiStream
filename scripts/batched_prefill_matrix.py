@@ -10,7 +10,6 @@ import argparse
 from datetime import datetime, timezone
 import math
 from pathlib import Path
-import statistics
 import time
 
 from scripts.export_hf_reference import file_digest
@@ -109,7 +108,27 @@ def evaluate_candidate(ckpt, validated, *, approve_local_execution=False,
         raise ValueError("Only cpu/cuda explicitly supported by candidate")
 
     import torch
-    from phistream.prefill import approved_batched_prefill
+    from phistream.prefill import (
+        approved_batched_prefill, estimated_extra_workspace_bytes,
+    )
+    from phistream.llama import LlamaSettings
+    from phistream.memory import memory_preflight, refuse_blocked
+
+    if device == "cuda" and not torch.cuda.is_available():
+        raise RuntimeError("CUDA unavailable; refusing silent CPU fallback")
+    full_context = len(validated["prompt"]) + STEPS - 1
+    observed_free = int(torch.cuda.mem_get_info()[0]) if device == "cuda" else None
+    continuation_plan = memory_preflight(
+        ckpt, context_tokens=full_context, capacity_mib=capacity_mib,
+        reserve_mib=reserve_mib, max_tensor_mib=max_tensor_mib,
+        head_rows=head_rows, observed_free_bytes=observed_free,
+    )
+    refuse_blocked(continuation_plan)
+    extra = estimated_extra_workspace_bytes(
+        LlamaSettings.from_checkpoint(ckpt), len(validated["prompt"])
+    )
+    if continuation_plan["estimated_working_set_bytes"] + extra > continuation_plan["available_policy_bytes"]:
+        raise MemoryError("Combined prefill/32-step continuation workspace exceeds memory-policy estimate")
 
     started = time.perf_counter()
     engine, logits, initial = approved_batched_prefill(
@@ -187,6 +206,7 @@ def evaluate_candidate(ckpt, validated, *, approve_local_execution=False,
             "measurement_scope": "ONE_SHOT_CANDIDATE_ONLY_NOT_RANDOMIZED_AB",
         },
         "candidate_evidence": initial,
+        "continuation_memory_policy": continuation_plan,
         "reference_independence_authenticated": False,
         "production_ready": False,
         "speedup_measured": False,
