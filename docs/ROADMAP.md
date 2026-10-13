@@ -194,3 +194,7 @@ remains unchanged. See [weight staging audit](WEIGHT_STAGE_AUDIT.md).
 ## Falsifiable milestone
 
 For at least one agreed *real* local model on Windows 11 with the RTX 5070 12GB GPU: generate >= 32 exact matching greedy token IDs relative to an independently loaded reference, fit the specified measured VRAM budget, and publish the complete receipt. For a “better than AirLLM” claim, run both on the same model+revision+hardware and document the comparison with uncertainty. No invented benchmark claims.
+
+### PR #23: separate causal batched-prefill research candidate (no production activation)
+
+The user provided a passing read-only PR22 audit of their prior SHA-bound four-case receipts: `EXACT_STAGE_COUNTER_LINEARITY_OBSERVED`, 269,030,016 staged checkpoint bytes and 655 weight-load operations per existing SINGLE decoder step. This records a structural counter identity, **not a speedup** or independently authenticated execution. PR23 adds a separate 2..24 token causal prefill candidate and CPU-only synthetic agreement/negative-control tests. The canonical SINGLE decoder, parity bridge and CLI stay untouched. Real-checkpoint 32-step parity, GPU memory/timing receipts, repeatability, and promotion remain unapproved and unmeasured. See [batched prefill candidate](BATCHED_PREFILL_CANDIDATE.md).
