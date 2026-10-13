@@ -285,3 +285,7 @@ The user-observed four-case real SmolLM2 CUDA validation matrix passed 128/128 g
 ## PR #23 · Opt-in batched causal prefill (CPU synthetic candidate)
 
 A separate `phistream.prefill.approved_batched_prefill` research API now explores processing 2–24 prompt tokens through each Llama layer once, preserving causal masking, RoPE, GQA and KV compatibility with `StreamingLlama.step()`. Explicit local execution approval and a memory-policy preflight are required. The shipped CLI, real-model bridge, and `SINGLE` decoder remain unchanged. CPU synthetic tests do **not** establish real-model parity, latency gains, a hard VRAM cap, or production readiness. See [batched prefill candidate](docs/BATCHED_PREFILL_CANDIDATE.md).
+
+## PR #24 · SHA-bound batched-prefill parity gate (default read-only)
+
+A new `scripts.batched_prefill_matrix` plan/run command validates the complete original PR21 four-case matrix, matching checkpoint and reference SHA256s, before any separately authorized candidate run. `plan` never executes the model. `run --approve-local-execution --device cuda` is opt-in per eligible 7/12/24-token case, compares all 32 teacher-forced greedy IDs and sampled logits, and records descriptive memory/staging evidence. The one-token case stays a control. No randomized A/B, performance win or production scheduler activation is claimed. See [candidate real-weight gate](docs/BATCHED_PREFILL_REAL_GATE.md).
