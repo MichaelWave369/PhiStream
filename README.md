@@ -4,7 +4,7 @@
 
 Developed for the MichaelWave369 ecosystem. Independent from AirLLM; no code, dependency, architecture adapter or model weights copied from AirLLM. The general technique of layer-by-layer execution is a widely known concept, not a proprietary algorithm.
 
-**Status:** CPU-correctness prototype. The model is a deterministic **untrained** miniature decoder, so generated tokens have **no language meaning**. No support yet for existing Llama/Qwen checkpoints. CUDA operations are implemented using PyTorch but must be verified on actual NVIDIA hardware. **No 70B/405B claim** and no speedup claim.
+**Status:** Experimental CPU synthetic fixture **plus** a narrow, local Llama-family safetensors token-ID inference path. On an operator-controlled RTX 5070, user-declared reference comparisons and 12 balanced paired BATCHED/SINGLE time measurements across three frozen SmolLM2-135M-Instruct prompt cases met the predeclared **further-review-only** gate. An offline SHA-bound audit checked the stored trial receipts. This is **not** authenticated reference provenance, statistical speedup certification, a production chat engine or general compatibility with arbitrary Llama/Qwen/GGUF checkpoints. No 70B/405B claim.
 
 ## Why this exists
 
@@ -297,3 +297,7 @@ The default-read-only `scripts.paired_real_prefill_ab` CLI verifies the original
 ## PR #26 · Read-only three-case paired evidence census
 
 The default-off `scripts.three_case_ab_audit` reviews the existing local PR25 paired A/B plan/run receipts for mixed_7, repeat_12, and spread_24. It re-hashes checkpoint/reference bindings, rechecks every recorded warmup/trial's parity, validates balanced order and recomputes per-pair statistics into one new exclusive JSON receipt. No model execution or scheduler change. The user-reported 12/12 BATCHED paired wins remain restricted to a single model/GPU and **do not prove a general speedup**. See [three-case census](docs/THREE_CASE_AB_CENSUS.md).
+
+## Public real-model research dashboard (PR #27)
+
+The [PhiStream GitHub Page](https://michaelwave369.github.io/PhiStream/) now separates the historical committed synthetic CPU fixture panels from the user's real-model RTX 5070 three-case local evidence. It shows the **descriptive** 15.53%, 24.77% and 39.68% median paired time differences, 12/12 paired BATCHED wins, plus the offline audit's 960 greedy checks and 8,590 sampled-logit checks across 30 local recorded executions. It includes a PR #21–26 evidence timeline and a **browser-only local JSON viewer** for PR25 run receipts and PR26 census receipts, with no uploads or inference. The planned eight-pair seed-70421 replication remains explicitly marked **not yet executed**. For methodology and limitations, see [PR25](docs/PAIRED_REAL_PREFILL_AB.md), [PR26](docs/THREE_CASE_AB_CENSUS.md), and [website documentation](site/README.md). The default production SINGLE decoder remains unchanged.
