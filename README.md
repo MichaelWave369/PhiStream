@@ -293,3 +293,7 @@ A new `scripts.batched_prefill_matrix` plan/run command validates the complete o
 ## PR #25 · Repeated SHA-bound real-model prefill A/B research (opt-in)
 
 The default-read-only `scripts.paired_real_prefill_ab` CLI verifies the original four-case SHA-bound baseline and earlier real batched candidate receipt, then predeclares a randomized, balanced SINGLE/BATCHED paired experiment. A separate CUDA run requires `--approve-local-execution` per frozen case; each warmup and trial must pass all 32 greedy IDs and sparse-logit probes. Recorded timings/staging/peak allocations yield **descriptive** paired evidence only, with predeclared further-review gates and no automatic scheduler activation, source authentication or speedup certification. See [paired real-model prefill A/B protocol](docs/PAIRED_REAL_PREFILL_AB.md).
+
+## PR #26 · Read-only three-case paired evidence census
+
+The default-off `scripts.three_case_ab_audit` reviews the existing local PR25 paired A/B plan/run receipts for mixed_7, repeat_12, and spread_24. It re-hashes checkpoint/reference bindings, rechecks every recorded warmup/trial's parity, validates balanced order and recomputes per-pair statistics into one new exclusive JSON receipt. No model execution or scheduler change. The user-reported 12/12 BATCHED paired wins remain restricted to a single model/GPU and **do not prove a general speedup**. See [three-case census](docs/THREE_CASE_AB_CENSUS.md).
