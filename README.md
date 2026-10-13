@@ -289,3 +289,7 @@ A separate `phistream.prefill.approved_batched_prefill` research API now explore
 ## PR #24 · SHA-bound batched-prefill parity gate (default read-only)
 
 A new `scripts.batched_prefill_matrix` plan/run command validates the complete original PR21 four-case matrix, matching checkpoint and reference SHA256s, before any separately authorized candidate run. `plan` never executes the model. `run --approve-local-execution --device cuda` is opt-in per eligible 7/12/24-token case, compares all 32 teacher-forced greedy IDs and sampled logits, and records descriptive memory/staging evidence. The one-token case stays a control. No randomized A/B, performance win or production scheduler activation is claimed. See [candidate real-weight gate](docs/BATCHED_PREFILL_REAL_GATE.md).
+
+## PR #25 · Repeated SHA-bound real-model prefill A/B research (opt-in)
+
+The default-read-only `scripts.paired_real_prefill_ab` CLI verifies the original four-case SHA-bound baseline and earlier real batched candidate receipt, then predeclares a randomized, balanced SINGLE/BATCHED paired experiment. A separate CUDA run requires `--approve-local-execution` per frozen case; each warmup and trial must pass all 32 greedy IDs and sparse-logit probes. Recorded timings/staging/peak allocations yield **descriptive** paired evidence only, with predeclared further-review gates and no automatic scheduler activation, source authentication or speedup certification. See [paired real-model prefill A/B protocol](docs/PAIRED_REAL_PREFILL_AB.md).
