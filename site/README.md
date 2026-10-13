@@ -12,7 +12,7 @@ npm install
 npm run dev
 ```
 
-The development and build scripts validate and copy the two committed **CPU synthetic fixture** receipts from `../benchmarks` into `public/benchmarks`. The UI does not collect data, connect to a GPU, execute models, or claim benchmark results for consumer hardware.
+The build verifies browser-only evidence validators with Node's test runner, then validates and copies two committed **CPU synthetic fixture** receipts from `../benchmarks` into `public/benchmarks`. The UI does not collect data, connect to a GPU or execute models. It separately presents user-local experimental RTX 5070 research observations without claiming independent verification or general speedups.
 
 ## Deployment
 
@@ -20,7 +20,15 @@ The root `.github/workflows/pages.yml` builds the site and deploys `site/dist` u
 
 If GitHub Pages isn't enabled, repository Settings → Pages → **Build and deployment** → **GitHub Actions**. Repository admins must configure this when necessary; the deployment workflow cannot promise to enable Pages automatically.
 
-The **capacity explorer is arithmetic only** (parameter count × storage bytes/parameter) and reserves an illustrative slice of device memory. It is not a GPU feasibility calculator. All performance receipts are explicitly synthetic, CPU-only tests. No model files shipped.
+The **capacity explorer is arithmetic only** (parameter count × storage bytes/parameter) and reserves an illustrative slice of device memory. It is not a GPU feasibility calculator. The older committed benchmark cards use synthetic CPU fixtures; the new real-model research section is explicitly separated as a user-reported local RTX 5070 experiment. No model files or private full CUDA receipts are shipped.
+
+## PR #27 real-model research dashboard
+
+The Research section presents the **user-local, offline-audited** seed-369 results for three frozen SmolLM2-135M-Instruct prompt cases (7, 12, and 24 tokens): 12/12 paired BATCHED wins, median paired decoder-time differences of 15.53%, 24.77%, and 39.68%. The 30 executed-trial parity comparisons recorded 960/960 greedy token matches and 8,590/8,590 sampled-logit matches. These counts are based on the user's prior local review, not a model run inside the site or repository and not independent provenance or statistical significance proof. The production default remains SINGLE. The cross-day 8-pair replication (seed 70421) is **planned only**, with no results claimed.
+
+The local Evidence Explorer optionally reads either `PHISTREAM_THREE_CASE_PAIRED_AB_CENSUS_V1` or `PHISTREAM_PAIRED_REAL_PREFILL_AB_V1` JSON chosen by the viewer. JavaScript bounds file size, checks expected schema/ledger counts, pair order and trial statuses, and recomputes paired times for the latter. This is display-only structural validation, **not SHA256 authentication**. For real SHA-bound checks, use the offline Python protocols in [PR #25](../docs/PAIRED_REAL_PREFILL_AB.md) and [PR #26](../docs/THREE_CASE_AB_CENSUS.md). The site never uploads, saves, executes or transmits the contents of user-selected files.
+
+Run `npm run test:evidence` in `site/` for the browser-validator regression suite. `npm run build` runs these tests automatically before Vite, so the GitHub Pages PR check fails for relevant regressions.
 
 ## Security
 
