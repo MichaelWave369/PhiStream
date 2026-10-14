@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { CASES, LEDGER, MILESTONES, validateCensusReceipt, validatePairedRunReceipt } from './paired-evidence.mjs';
 import './paired-research.css';
 import ReplicationResearch from './ReplicationResearch.jsx';
+import LongContextLab from './LongContextLab.jsx';
 import { REPLICATION } from './replication-evidence.mjs';
 
 const REPO = 'https://github.com/MichaelWave369/PhiStream';
@@ -140,6 +141,8 @@ export default function PairedResearch() {
 
     <ReplicationResearch/>
 
+    <LongContextLab/>
+
     <div className="pr-bottom-grid">
       <div className="pr-timeline">
         <div className="pr-card-head"><span>03 / EXPERIMENT MILESTONES</span><span>PR #21–28</span></div>
@@ -152,9 +155,9 @@ export default function PairedResearch() {
       <div className="pr-next">
         <div className="pr-card-head"><span>04 / NEXT TEST</span><span>UNAUTHORIZED / NOT EXECUTED</span></div>
         <h4>Held-out prompts and VRAM safety.</h4>
-        <p>With the operator's local SHA audit of the eight-pair spread_24 replication complete, the next research design can investigate longer held-out prompts, a second GPU and real memory pressure. These are proposals, not approved runs or expected results.</p>
+        <p>The Long Context Laboratory now publishes held 128/512/2048-token metadata-only planning targets. Separate future work would need new references, a bounded prefill implementation and explicit permission before any CUDA run. These are proposals, not approved runs or expected results.</p>
         <div className="pr-next-stats"><div><strong>2K</strong><small>token target for future design</small></div><div><strong>3060</strong><small>alternative GPU to evaluate</small></div><div><strong>0</strong><small>new runs authorized</small></div></div>
-        <p className="pr-next-note">The operator reports PR #28 SHA-bound review success. That confirms local receipt consistency, not independent provenance or speedup certification. No separate longer-context experiment has been approved.</p>
+        <p className="pr-next-note">The operator reports PR #28 SHA-bound review success. That confirms local receipt consistency, not independent provenance or speedup certification. PR #30 creates only a read-only planning protocol. No new longer-context reference or model execution has been approved.</p>
       </div>
     </div>
 
