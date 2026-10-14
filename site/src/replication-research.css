@@ -34,3 +34,11 @@
 .pr-replication-empty{color:#91aba9!important;font-size:11px!important}
 @media(max-width:850px){.pr-replication-head,.pr-replication-reader{grid-template-columns:1fr}}
 @media(max-width:550px){.pr-replication{padding:18px}.pr-compare{grid-template-columns:1fr}.pr-replication-status strong{font-size:32px}}
+
+/* PR29: full local SHA-audited four-cohort ledger; browser never attests provenance */
+.pr-replication-ledger{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:14px 0}
+.pr-replication-ledger>div{background:#0e2728;border:1px solid #396e65;padding:15px;display:flex;flex-direction:column;gap:9px}
+.pr-replication-ledger small{font-size:10px;color:#a1c7bd;line-height:1.4}
+.pr-replication-ledger strong{color:#9cf6d6;font-size:clamp(18px,2.1vw,26px);font-variant-numeric:tabular-nums;letter-spacing:-.04em}
+@media(max-width:850px){.pr-replication-ledger{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:440px){.pr-replication-ledger{grid-template-columns:1fr 1fr}.pr-replication-ledger>div{padding:10px}.pr-replication-ledger strong{font-size:20px}}
