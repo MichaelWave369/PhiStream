@@ -46,6 +46,7 @@ export function validateReplicationReview(r) {
     !finite(b.median_relative_ttft_gain) ||
     !finite(b.median_cumulative_weight_bytes_reduction) ||
     typeof b.review_thresholds_met !== 'boolean' ||
+    b.review_thresholds_met !== (b.median_paired_relative_gain >= 0.05 && b.candidate_faster_pair_count >= 6) ||
     b.qualification !== (b.review_thresholds_met
       ? 'CANDIDATE_FOR_REPLICATED_REVIEW_NOT_PROVEN_SPEEDUP'
       : 'INCONCLUSIVE_OR_NO_PERFORMANCE_BENEFIT') ||
