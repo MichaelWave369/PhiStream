@@ -57,7 +57,14 @@ function fixture() {
 test('operator snapshot captures eight pairs and explicitly no independent SHA claim', () => {
   assert.equal(REPLICATION.pairs, 8);
   assert.equal(REPLICATION.wins, 8);
-  assert.equal(REPLICATION.status, 'OPERATOR_REPORTED_OFFLINE_AUDIT_PENDING');
+  assert.equal(REPLICATION.status, 'OPERATOR_REPORTED_LOCAL_SHA_AUDIT_PASSED');
+  assert.equal(REPLICATION.auditReceiptStatus, 'REPLICATION_REVIEW_CANDIDATE_NOT_SPEEDUP_CERTIFIED');
+  assert.equal(REPLICATION.combinedPairs, 20);
+  assert.equal(REPLICATION.combinedWins, 20);
+  assert.equal(REPLICATION.checkedExecutions, 48);
+  assert.equal(REPLICATION.checkedGreedy, 1536);
+  assert.equal(REPLICATION.checkedSparseLogits, 13774);
+  assert.equal(REPLICATION.medianGainDifferencePoints, 0.9021);
 });
 test('positive local review is accepted as structurally consistent, not authenticated', () => {
   const input = fixture();

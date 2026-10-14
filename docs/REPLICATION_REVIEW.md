@@ -57,7 +57,7 @@ The audit reads and hashes full local model bytes. It does not load an inference
 
 ## Public site
 
-The dashboard presents the submitted replication as operator-reported / awaiting PR28 offline review. The local JSON importer performs only structural and arithmetic checks, **not SHA256 authentication**.
+Following the operator's October 13 local execution, the dashboard now reports **operator-reported SHA-bound local audit passed**, with the literal verdict `REPLICATION_REVIEW_CANDIDATE_NOT_SPEEDUP_CERTIFIED` and the combined four-cohort counters. The PR28 protocol below continues to stand as the reproducibility procedure. The local JSON importer performs only structural and arithmetic checks, **not SHA256 authentication**.
 
 ## Limits
 

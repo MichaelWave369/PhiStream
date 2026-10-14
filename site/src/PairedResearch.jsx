@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { CASES, LEDGER, MILESTONES, validateCensusReceipt, validatePairedRunReceipt } from './paired-evidence.mjs';
 import './paired-research.css';
 import ReplicationResearch from './ReplicationResearch.jsx';
+import { REPLICATION } from './replication-evidence.mjs';
 
 const REPO = 'https://github.com/MichaelWave369/PhiStream';
 const percent = number => (100 * number).toFixed(2) + '%';
@@ -33,7 +34,7 @@ function PairDiagram({ row }) {
 function Caution() {
   return <p className="pr-limits">
     <strong>Scientific scope:</strong> one local SmolLM2-135M-Instruct checkpoint and one RTX 5070.
-    Four original pairs per prompt case plus an operator-reported eight-pair spread_24 replication; 32 generated steps each. This is user-reported,
+    Four original pairs per prompt case plus an eight-pair spread_24 replication; 32 generated steps each. The operator reports successful local SHA-bound auditing,
     offline SHA-bound evidence, <strong>not independently authenticated model
     provenance, statistical significance, or general speedup certification</strong>.
     The decoder still defaults to SINGLE. The browser does not verify SHA256 chains.
@@ -86,14 +87,14 @@ export default function PairedResearch() {
       <div className="pr-stage">
         <span>RESEARCH STAGE</span>
         <strong>Further review</strong>
-        <small>Three original workloads passed offline review. Cross-day replication reported; PR #28 independent local audit pending.</small>
+        <small>All four cohorts locally audited in the operator's terminal, including the new cross-day replication. General speedup remains unproven.</small>
       </div>
     </div>
 
     <div className="pr-metric-grid">
-      <Metric label="BATCHED FASTER PAIRS" value="20/20" detail="12/12 original locally audited + 8/8 replication operator-reported"/>
-      <Metric label="GREEDY ID CHECKS" value={integer(LEDGER.greedy) + '/' + integer(LEDGER.greedy)} detail="Across 30 recorded local executions"/>
-      <Metric label="SAMPLED LOGIT CHECKS" value={integer(LEDGER.probes) + '/' + integer(LEDGER.probes)} detail="Sparse coordinates, original tolerances"/>
+      <Metric label="BATCHED FASTER PAIRS" value={REPLICATION.combinedWins + '/' + REPLICATION.combinedPairs} detail="Across four operator-reported SHA-audited local cohorts"/>
+      <Metric label="GREEDY ID CHECKS" value={integer(REPLICATION.checkedGreedy) + '/' + integer(REPLICATION.checkedGreedy)} detail="Across 48 recorded local executions"/>
+      <Metric label="SAMPLED LOGIT CHECKS" value={integer(REPLICATION.checkedSparseLogits) + '/' + integer(REPLICATION.checkedSparseLogits)} detail="Sparse coordinates, frozen reference tolerances"/>
       <Metric label="SCHEDULER DEFAULT" value="SINGLE" detail="No experimental production promotion"/>
     </div>
 
@@ -141,7 +142,7 @@ export default function PairedResearch() {
 
     <div className="pr-bottom-grid">
       <div className="pr-timeline">
-        <div className="pr-card-head"><span>03 / EXPERIMENT MILESTONES</span><span>PR #21–26</span></div>
+        <div className="pr-card-head"><span>03 / EXPERIMENT MILESTONES</span><span>PR #21–28</span></div>
         <h4>A traceable development history.</h4>
         <ol>{MILESTONES.map(m => <li key={m.pr}>
           <span className="pr-timeline-index">#{m.pr}</span>
@@ -151,9 +152,9 @@ export default function PairedResearch() {
       <div className="pr-next">
         <div className="pr-card-head"><span>04 / NEXT TEST</span><span>UNAUTHORIZED / NOT EXECUTED</span></div>
         <h4>Held-out prompts and VRAM safety.</h4>
-        <p>After auditing the reported eight-pair spread_24 replication with seed <strong>{LEDGER.nextSeed}</strong>, investigate longer held-out prompts, a second GPU and real memory pressure. These are proposals, not approved runs or expected results.</p>
+        <p>With the operator's local SHA audit of the eight-pair spread_24 replication complete, the next research design can investigate longer held-out prompts, a second GPU and real memory pressure. These are proposals, not approved runs or expected results.</p>
         <div className="pr-next-stats"><div><strong>2K</strong><small>token target for future design</small></div><div><strong>3060</strong><small>alternative GPU to evaluate</small></div><div><strong>0</strong><small>new runs authorized</small></div></div>
-        <p className="pr-next-note">The eight-pair replication is operator-reported above; its SHA-bound PR #28 review has not yet been executed. No separate longer-context experiment has been approved.</p>
+        <p className="pr-next-note">The operator reports PR #28 SHA-bound review success. That confirms local receipt consistency, not independent provenance or speedup certification. No separate longer-context experiment has been approved.</p>
       </div>
     </div>
 

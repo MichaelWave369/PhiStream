@@ -27,6 +27,8 @@ export const MILESTONES = Object.freeze([
   Object.freeze({ pr: 24, name: 'Real-model parity gate', note: 'Three opt-in BATCHED cases matched reference tokens and sparse logit probes.' }),
   Object.freeze({ pr: 25, name: 'Balanced A/B trials', note: 'Four paired rounds per workload, each step checked against original references.' }),
   Object.freeze({ pr: 26, name: 'Offline evidence census', note: 'Local SHA-bound reviewer recalculated and checked the entire saved evidence series.' }),
+  Object.freeze({ pr: 27, name: 'Public research dashboard', note: 'Published bounded real-model observations, local-only receipt readers and provenance limits.' }),
+  Object.freeze({ pr: 28, name: 'Cross-day replication review', note: 'Operator reports successful SHA-bound offline audit of the eight-pair seed-70421 replication; general speedup remains unproven.' }),
 ]);
 
 const isObject = v => v !== null && typeof v === 'object' && !Array.isArray(v);

@@ -32,11 +32,12 @@ export default function ReplicationResearch() {
         <h4>Same frozen prompt.<br/>A new seed and a new day.</h4>
         <p>A second local RTX 5070 spread_24 cohort was reported on October 13,
           following the October 12 original. Eight balanced pairs, seed 70421.
-          The performance pattern appears again, but the independent PR #28
-          offline receipt audit is still pending.</p>
+          The performance pattern appeared again. The operator subsequently ran
+          the PR #28 local SHA-bound receipt audit and reported that it passed.
+          This remains a limited, locally audited experiment, not external validation.</p>
       </div>
       <div className="pr-replication-status">
-        <span>OPERATOR-REPORTED RESULT</span>
+        <span>OPERATOR-REPORTED / LOCAL AUDIT PASSED</span>
         <strong>{percent(REPLICATION.gain)}</strong>
         <small>Median paired decoder-time reduction</small>
         <b>8/8 BATCHED faster pairs</b>
@@ -56,23 +57,31 @@ export default function ReplicationResearch() {
         <div className="pr-compare-bar"><i style={{width:percent(REPLICATION.gain)}}/></div>
       </div>
     </div>
+    <div className="pr-replication-ledger" aria-label="Operator-reported complete four-cohort local audit counts">
+      <div><small>BATCHED-faster comparisons</small><strong>{REPLICATION.combinedWins}/{REPLICATION.combinedPairs}</strong></div>
+      <div><small>Recorded executions audited</small><strong>{REPLICATION.checkedExecutions}</strong></div>
+      <div><small>Matching greedy-token checks</small><strong>{REPLICATION.checkedGreedy.toLocaleString('en-US')}</strong></div>
+      <div><small>Matching sampled-logit checks</small><strong>{REPLICATION.checkedSparseLogits.toLocaleString('en-US')}</strong></div>
+    </div>
     <div className="pr-replication-detail">
       <span>TTFT medians: {percent(REPLICATION.originalTtft)} → {percent(REPLICATION.ttft)}</span>
+      <span>Median paired-gain difference: +{REPLICATION.medianGainDifferencePoints.toFixed(4)} percentage points</span>
       <span>Staging reduction in new cohort: {(REPLICATION.stagedBytesSaved / 1e9).toFixed(2)} GB</span>
-      <span>Additional expected parity coverage: 576 token checks, 5,184 sparse probes</span>
+      <span>New cohort: 576/576 token checks, 5,184/5,184 sparse probes in the local audit</span>
     </div>
     <div className="pr-replication-limit">
-      <b>Claim boundary.</b> These are values from the operator's local terminal output,
-      not a completed PR #28 audit or independently reproduced benchmark.
-      A calendar separation is reported, not independently time-attested.
-      No new source authentication, statistical proof or scheduler promotion.
-      The original SINGLE decoder remains the default.
+      <b>Claim boundary.</b> The operator reported successfully running the PR #28
+      SHA-bound offline receipt auditor. Its recorded verdict is
+      REPLICATION_REVIEW_CANDIDATE_NOT_SPEEDUP_CERTIFIED, not independent
+      checkpoint-publisher authentication or reproduction by another laboratory.
+      Calendar separation remains operator-reported, not externally time-attested.
+      No statistical proof or scheduler promotion. The original SINGLE decoder remains the default.
     </div>
     <div className="pr-replication-reader">
       <div>
         <h5>Open your new offline replication review</h5>
-        <p>After running the PR #28 Python audit locally, select its new
-          replication-review-seed70421.json receipt here. This static browser
+        <p>The operator has completed the PR #28 Python audit locally. Select the saved
+          replication-review-seed70421.json receipt here to inspect it. This static browser
           checks internal structure and arithmetic, <strong>not original SHA256 chains</strong>.
           Files remain in your browser and are not uploaded or stored.</p>
         <a href="https://github.com/MichaelWave369/PhiStream/blob/main/docs/REPLICATION_REVIEW.md"
@@ -88,8 +97,8 @@ export default function ReplicationResearch() {
           <strong>{review.status}</strong>
           <small>{filename} · {review.combined.batched_faster_pairs}/20 BATCHED faster
             · {percent(review.replication.median_paired_relative_gain)} median new paired gain</small>
-          <p>Check the offline Python exit code and hashes before treating this receipt as reviewed local evidence.</p>
-        </div> : !error && <p className="pr-replication-empty">No PR28 audit loaded yet. Operator-reported chart remains labeled provisional.</p>}
+          <p>This browser checks structure only. The operator-reported successful offline Python SHA-bound review is the evidence-consistency check, not an external certification.</p>
+        </div> : !error && <p className="pr-replication-empty">No local PR28 JSON selected. The chart reports the operator's completed offline audit; import the file to inspect its structure.</p>}
       </div>
     </div>
   </section>;

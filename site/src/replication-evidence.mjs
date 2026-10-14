@@ -5,7 +5,11 @@ export const REPLICATION = Object.freeze({
   gain: 0.405861, ttft: 0.924930, stagedBytesSaved: 6187663872,
   originalSeed: 369, originalPairs: 4, originalWins: 4, originalGain: 0.396840,
   originalTtft: 0.925016, originalProbes: 288,
-  status: "OPERATOR_REPORTED_OFFLINE_AUDIT_PENDING",
+  status: "OPERATOR_REPORTED_LOCAL_SHA_AUDIT_PASSED",
+  auditReceiptStatus: "REPLICATION_REVIEW_CANDIDATE_NOT_SPEEDUP_CERTIFIED",
+  combinedPairs: 20, combinedWins: 20, checkedExecutions: 48,
+  checkedGreedy: 1536, checkedSparseLogits: 13774,
+  medianGainDifferencePoints: 0.9021,
 });
 
 const obj = value => value !== null && typeof value === 'object' && !Array.isArray(value);
