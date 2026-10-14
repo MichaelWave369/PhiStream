@@ -64,7 +64,7 @@ const makeRun = () => {
 
 test('public snapshot matches frozen user-local ledger totals', () => {
   assert.equal(CASES.length, 3);
-  assert.equal(MILESTONES.length, 6);
+  assert.equal(MILESTONES.length, 8);
   assert.equal(LEDGER.greedy, 30 * 32);
   assert.equal(LEDGER.probes, CASES.reduce((n, c) => n + c.probes * 10, 0));
   assert.equal(LEDGER.wins, CASES.reduce((n, c) => n + c.wins, 0));
