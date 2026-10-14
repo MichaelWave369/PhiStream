@@ -69,3 +69,7 @@ The React research page now separates the user's original seed-369 four-pair `sp
 A separate local-only upload reader accepts `PHISTREAM_REPLICATION_REVIEW_V1` JSON. JavaScript validates schema, original/replication comparison structure and combined counts; this is **not cryptographic SHA256 evidence verification**. No user files are uploaded, persisted or used for model execution. See [the operator audit procedure](../docs/REPLICATION_REVIEW.md).
 
 The site build runs both the original frozen evidence-viewer tests and the replication-viewer regression tests. No new inference or experiment is triggered by this web update.
+
+## PR #30: Long Context Laboratory (all held)
+
+The site now displays three distinct **planning-only** cards for 128, 512, and 2,048 input tokens with 32-step continuation requirements of 159, 543 and 2,079 positions respectively. These are not speed benchmarks. BATCHED remains capped at 24 tokens, and no new test, model execution or reference is authorized. The browser-only local JSON reader requires a `PHISTREAM_LONG_CONTEXT_PROTOCOL_V1` held plan from `scripts.long_context_lab plan`, checks the refusal fields, and displays metadata-only estimated scores and context fit. This is **not model SHA authentication, a measured GPU peak or a general-fit predictor**. Browser data is not uploaded or retained. Regression tests run before the Pages build. See [method and safe operator protocol](../docs/LONG_CONTEXT_LAB.md).
