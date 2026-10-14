@@ -8,7 +8,7 @@
     "dev": "node scripts/sync-benchmarks.mjs && vite --host",
     "build": "npm run test:evidence && node scripts/sync-benchmarks.mjs && vite build",
     "preview": "vite preview --host",
-    "test:evidence": "node --test src/paired-evidence.test.mjs"
+    "test:evidence": "node --test src/paired-evidence.test.mjs src/replication-evidence.test.mjs"
   },
   "dependencies": {
     "react": "^19.1.1",
