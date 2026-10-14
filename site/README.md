@@ -61,3 +61,11 @@ A local-only **HF Reference Trace** reader presents the separately generated 32-
 The read-only real-weight matrix panel accepts a local four-case review summary JSON. Its displayed status is **user-local and not authenticated by the browser**. The offline Python reviewer checks evidence binding; see [operator protocol](../docs/REAL_WEIGHT_MATRIX.md).
 
 The offline weight staging audit accepts a user-local receipt and visualizes the SHA-bound four-case counter identity. It does **not** execute a model, authenticate the provided JSON, or claim achieved acceleration. See [method and limits](../docs/WEIGHT_STAGE_AUDIT.md).
+
+## PR #28: operator-reported eight-pair replication
+
+The React research page now separates the user's original seed-369 four-pair `spread_24` cohort (39.684% median paired decoder-time reduction) from the **operator-reported** October 13 eight-pair seed-70421 replication (40.5861%, 8/8 faster BATCHED pairs). These are the user's local terminal results, not independently audited or statistically certified results. The Python PR28 offline SHA-bound review is intentionally **pending until it is run on the operator's local receipt files**. The static website doesn't claim its existence changes the evidence status automatically.
+
+A separate local-only upload reader accepts `PHISTREAM_REPLICATION_REVIEW_V1` JSON. JavaScript validates schema, original/replication comparison structure and combined counts; this is **not cryptographic SHA256 evidence verification**. No user files are uploaded, persisted or used for model execution. See [the operator audit procedure](../docs/REPLICATION_REVIEW.md).
+
+The site build runs both the original frozen evidence-viewer tests and the replication-viewer regression tests. No new inference or experiment is triggered by this web update.
