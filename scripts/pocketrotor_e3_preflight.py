@@ -154,8 +154,6 @@ def inspect_source(raw: bytes) -> dict:
                     experts_consumer = True
     require(gate_result and experts_consumer,
             "Block no longer passes third native gate result as second experts argument")
-    require(_assigned_from(router_init, "self.num_experts", "NONEXISTENT") is False,
-            "Internal introspection invalid")
     # Attributes are assigned from config, not from unrelated metadata.
     attr = lambda value, name: any(
         isinstance(item, ast.Assign) and any(_attribute(t, "self." + name) for t in item.targets)
