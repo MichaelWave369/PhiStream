@@ -378,3 +378,19 @@ batch/multi-token prefill, unrecognized modules and incomplete layers.
 No model is loaded by PhiStream; no Ollama/GGUF hook, real pretrained
 capture, measured GPU transfer or speedup is claimed. CPU CI uses
 only tiny fake native-shaped PyTorch modules.
+
+
+## ΦPocketRotor E3-P · Offline Qwen3.5 source/config preflight
+
+The [E3-P preflight](docs/POCKETROTOR_E3_PREFLIGHT.md) checks an
+**existing local** Hugging Face Qwen3.5 modeling source file and
+checkpoint directory without importing models, running PyTorch, or
+reading actual weight tensor contents. It AST-checks that the native
+gate returns its original selected indices and the sparse block passes
+them to native experts, verifies the nested 40-layer/256-expert/top-8
+config, and requires local nonempty safetensors shard filenames.
+GGUF/Ollama files are explicitly refused because E3's hook is a
+Hugging Face Transformers **Python** adapter, not a GGUF hook.
+The output is only **static compatibility for operator review**,
+not proof of authentic weights, runnable inference, hardware fit,
+native routing capture, or faster execution.
