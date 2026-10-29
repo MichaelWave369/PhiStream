@@ -431,3 +431,14 @@ the E2 cache policies for selected layers. **The manual pretrained
 download is NOT started by a merge, push or PR.** Until manually
 executed successfully it is just an unrun protocol, not evidence
 of pretrained routing or GPU speedup.
+
+
+### ΦPocketRotor E5-A: exact checkpoint SHA-256 gate
+
+The [E5 pretrained pilot](docs/POCKETROTOR_E5_PRETRAINED.md) now
+compares a full locally downloaded Granite safetensors hash to the
+**published digest for the pinned model revision**, failing closed
+before loading weights on any mismatch. This is a stronger
+byte-integrity check, **not** a claim that the pretrained pilot has
+already run. The ~2.67 GB real-checkpoint download remains explicit,
+manual-only, and wholly absent from PR tests.
