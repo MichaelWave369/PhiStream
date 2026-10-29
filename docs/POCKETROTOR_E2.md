@@ -77,7 +77,7 @@ the trace, fetches models, opens networks, or modifies the source.
 ~~~
 
 This is merely a *schema illustration*, not a trained benchmark.
-Valid traces require 4..128 experts, 2..4096 training steps, 2..4096
+Valid traces require 4..256 experts, 2..4096 training steps, 2..4096
 steps for each of 1..8 holdouts, 1..8 distinct required expert IDs
 per step, up to 16 MiB per expert, max 2 GiB simulated cache and
 0..4 speculative loads after each step. Demand must fit in the
@@ -124,3 +124,12 @@ In particular, canonical \`StreamingLlama\` is **not** a Qwen-MoE or
 GGUF executor. E2 does not pretend otherwise.
 
 **Ledger Above Ego.**
+
+
+### E3 format compatibility
+
+The V1 trace schema now accepts up to 256 named expert IDs, while
+keeping all existing size, cache and top-k limits. This enables a
+Qwen3.5-35B-A3B routing **trace** to be represented after an external
+native-model capture, without making its original weights runnable
+under the canonical dense-Llama executor.

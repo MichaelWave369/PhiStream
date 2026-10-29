@@ -363,3 +363,18 @@ transitions. A conversion manifest labels source identity as
 instrument any pretrained model; actual native routing IDs must be
 provided by a separately reviewed, locally controlled runtime.
 No Qwen/Ollama/GGUF support or physical weight movement is added.
+
+
+## ΦPocketRotor E3 · Qwen3.5 Native Gate-to-Experts Hook
+
+The [E3 adapter](docs/POCKETROTOR_E3_QWEN35.md) can attach to a
+separately loaded, opt-in **Hugging Face Transformers Qwen3.5 MoE**
+model and observe its **native router-selected expert IDs** without
+recomputing or replacing routing. A second hook requires identical
+IDs to reach the experts module. The E2 simulator and E2-R capture
+format now admit up to 256 routed experts (top-k remains at most 8)
+for the Qwen3.5-35B-A3B family. The hook deliberately rejects
+batch/multi-token prefill, unrecognized modules and incomplete layers.
+No model is loaded by PhiStream; no Ollama/GGUF hook, real pretrained
+capture, measured GPU transfer or speedup is claimed. CPU CI uses
+only tiny fake native-shaped PyTorch modules.

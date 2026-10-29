@@ -70,9 +70,9 @@ by 1..8 named holdouts. Each split must record the same 1..128
 selected layers and contain complete, gapless token-step indices
 0..N-1 for every layer. All recorded layers must have the same
 N within a split. Each sequence has 2..4096 steps; expert indices
-must be 0..127, distinct per step, with at most 8 selected experts
+must be 0..255, distinct per step, with at most 8 selected experts
 per routed group. This first version supports only uniform
-expert_count across captured layers.
+expert_count across captured layers (now up to 256 for Qwen3.5).
 
 This structure deliberately fails closed when a model's output does
 not meet the simplified E2 simulation assumptions. The bridge does
@@ -136,3 +136,14 @@ formatting alone. Only after that should we implement physical
 expert-weight staging and benchmark actual transfer overlap.
 
 **Ledger Above Ego.**
+
+
+### E3 Qwen3.5 native-adapter compatibility
+
+E2-R accepts up to 256 routed expert IDs with unchanged per-event
+top-k-8 and event/file bounds. The
+[E3 hook adapter](POCKETROTOR_E3_QWEN35.md) can observe the
+third router output and confirm the exact same indices enter native
+experts, but only inside a separately loaded, approved HF Transformers
+Qwen3.5 MoE text runtime. Nothing is downloaded or executed by this
+offline bridge.

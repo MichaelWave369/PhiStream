@@ -100,7 +100,7 @@ def validate_capture(capture: dict) -> dict:
              "Unknown capture schema or fields")
     source = _source(capture["source"])
     n = capture["expert_count"]
-    _require(type(n) is int and 4 <= n <= 128, "Expert count must be 4..128")
+    _require(type(n) is int and 4 <= n <= 256, "Expert count must be 4..256")
     events = capture["events"]
     _require(isinstance(events, list) and 4 <= len(events) <= MAX_EVENTS,
              "Capture must have 4..16384 routed events")
@@ -229,8 +229,8 @@ class RouteEventRecorder:
     """
     def __init__(self, source: dict, expert_count: int):
         self.source = dict(_source(source))
-        _require(type(expert_count) is int and 4 <= expert_count <= 128,
-                 "Expert count must be 4..128")
+        _require(type(expert_count) is int and 4 <= expert_count <= 256,
+                 "Expert count must be 4..256")
         self.expert_count = expert_count
         self.events: list[dict] = []
 

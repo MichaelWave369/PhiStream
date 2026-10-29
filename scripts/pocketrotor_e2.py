@@ -38,8 +38,8 @@ def validate(trace: dict) -> dict:
     expert_bytes = trace.get("expert_bytes")
     capacity_bytes = trace.get("capacity_bytes")
     max_prefetch = trace.get("max_prefetch")
-    if type(expert_count) is not int or not 4 <= expert_count <= 128:
-        raise ValueError("Expert count must be 4..128")
+    if type(expert_count) is not int or not 4 <= expert_count <= 256:
+        raise ValueError("Expert count must be 4..256")
     if type(expert_bytes) is not int or not 1 <= expert_bytes <= 16 * 1024 * 1024:
         raise ValueError("Expert byte size must be 1..16 MiB")
     if type(capacity_bytes) is not int or not 1 <= capacity_bytes <= 2 * 1024**3:
