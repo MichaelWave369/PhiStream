@@ -229,7 +229,7 @@ class RouteEventRecorder:
     """
     def __init__(self, source: dict, expert_count: int):
         self.source = dict(_source(source))
-        _require(type(expert_count) is int and 4 <= expert_count <= 128,
+        _require(type(expert_count) is int and 4 <= expert_count <= 256,
                  "Expert count must be 4..128")
         self.expert_count = expert_count
         self.events: list[dict] = []
