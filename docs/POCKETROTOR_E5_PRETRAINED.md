@@ -124,3 +124,28 @@ valuable result and must remain visible. Do not bypass
 \`--authorize-download\` or automatically schedule the pretrained job.
 
 **Ledger Above Ego.**
+
+
+## E5-A checkpoint integrity gate
+
+The operator-authorized pretrained job now requires the **actual
+SHA-256 of the full local safetensors bytes** to match the published
+Hugging Face digest for pinned revision
+`23d6629dbac8c0a0652f28991f62bb75157c02e3`:
+
+`f7ae1cee56a9ea6c5360437b1c0407f8d84816b2cc75470f4e7e5236fa2a07dc`
+
+Public source:
+https://huggingface.co/ibm-granite/granite-3.0-1b-a400m-instruct/blob/23d6629dbac8c0a0652f28991f62bb75157c02e3/model.safetensors
+
+If a downloaded or replaced shard fails this byte-level check, the
+pilot refuses to call `from_pretrained`; it produces no successful
+capture or evaluation receipt. The CI unit tests exercise this guard
+with **small scratch files**, not the 2.67 GB checkpoint.
+
+This is a stronger provenance binding than merely computing and
+printing a hash. It does not provide independent author
+authentication or attest that a particular third-party library
+actually executed the claimed weights. It does not authorize a
+download: the pretrained workflow remains **manual-only**, with a
+required opt-in choice.
