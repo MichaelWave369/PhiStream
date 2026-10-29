@@ -394,3 +394,17 @@ Hugging Face Transformers **Python** adapter, not a GGUF hook.
 The output is only **static compatibility for operator review**,
 not proof of authentic weights, runnable inference, hardware fit,
 native routing capture, or faster execution.
+
+
+## ΦPocketRotor E4 · Native Hugging Face MoE CPU Integration
+
+The [E4 protocol](docs/POCKETROTOR_E4_NATIVE_CPU.md) introduces
+a separate, opt-in [GitHub Actions workflow](.github/workflows/pocketrotor-e4-native-cpu.yml)
+that installs pinned Hugging Face Transformers **5.21.0** and invokes
+the *actual native* Qwen3.5 MoE router and expert classes under **tiny
+synthetic CPU weights** (2 toy layers, 256 experts, top-8). It captures
+the native gate-to-expert indices using E3, checks exact output parity
+against unhooked execution, and converts the trace through E2-R/E2.
+This does **not** download a pretrained checkpoint, touch Ollama,
+execute a 35B model or claim real-world speedups. Evidence is explicitly
+labeled a synthetic-weight real-library integration smoke test.
