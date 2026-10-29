@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 from datetime import datetime, timezone
 import json
+import gc
 import platform
 import time
 
@@ -14,16 +15,50 @@ from .format import ModelConfig, ModelStore, build_fixture
 
 
 def benchmark(store: ModelStore, mode: str, device: str,
-              prompt: list[int], n_tokens: int, pin_budget_mib: float) -> dict:
+              prompt: list[int], n_tokens: int, pin_budget_mib: float,
+              warmups: int = 0) -> dict:
+    """Generation-only toy timing; each optional warmup uses a fresh engine.
+
+    Unscored passes prime CPU/GPU runtime and OS caches, but must never
+    contribute their loads, positions or elapsed seconds to the receipt.
+    Default zero preserves historic results; use --warmups 1 or 2 when
+    collecting new comparable warm-condition data.
+    """
+    if type(warmups) is not int or not 0 <= warmups <= 5:
+        raise ValueError("warmups must be an integer from 0 through 5")
+    if type(n_tokens) is not int or n_tokens < 1:
+        raise ValueError("tokens must be a positive integer")
+    if not isinstance(prompt, list) or not prompt or any(
+        type(t) is not int for t in prompt
+    ):
+        raise ValueError("prompt must be nonempty integer token ID list")
+    warm_tokens: list[list[int]] = []
+    for _ in range(warmups):
+        warming = PhiStreamEngine(
+            store, mode=mode, device=device, pin_budget_mib=pin_budget_mib)
+        warm_tokens.append(warming.generate(prompt, n_tokens))
+        if warming.device.type == "cuda":
+            torch.cuda.synchronize(warming.device)
+        del warming
+        gc.collect()  # outside timed region and before measured engine
     engine = PhiStreamEngine(store, mode=mode, device=device, pin_budget_mib=pin_budget_mib)
+    if engine.device.type == "cuda":
+        torch.cuda.synchronize(engine.device)
     start = time.perf_counter()
     tokens = engine.generate(prompt, n_tokens)
+    if engine.device.type == "cuda":
+        torch.cuda.synchronize(engine.device)
     elapsed = time.perf_counter() - start
+    if any(ids != tokens for ids in warm_tokens):
+        raise ValueError("Warmup and measured greedy token IDs differ")
     c = engine.counters
     return {
         "date_utc": datetime.now(timezone.utc).isoformat(),
         "provenance": "MEASURED_ON_THIS_MACHINE_SYNTHETIC_UNTRAINED",
         "mode": mode, "device": str(engine.device),
+        "warmup_passes_unscored": warmups,
+        "timing_scope": "ONE_FRESH_ENGINE_GENERATION_ONLY_AFTER_UNSCORED_WARMUPS",
+        "warmup_generation_parity_checked": bool(warmups),
         "torch_version": torch.__version__, "platform": platform.platform(),
         "gpu_name": torch.cuda.get_device_name(engine.device) if engine.device.type == "cuda" else None,
         "config": vars(store.config), "model_weight_bytes": store.bytes_total,
@@ -55,6 +90,8 @@ def main() -> None:
     bench.add_argument("--prompt", default="1,2,3")
     bench.add_argument("--tokens", type=int, default=4)
     bench.add_argument("--pin-mib", type=float, default=0.0)
+    bench.add_argument("--warmups", type=int, default=0,
+                       help="0-5 fresh-engine unscored warmup passes (default 0 for historical comparability)")
     parity = sp.add_parser("parity", help="Verify streamed and resident logits on this model")
     parity.add_argument("directory")
     parity.add_argument("--device", choices=["auto", "cpu", "cuda"], default="auto")
@@ -547,7 +584,7 @@ def main() -> None:
         print(json.dumps({"status": "verified", "tensor_count": len(store.entries)}, indent=2))
     elif args.command == "bench":
         prompt = [int(n.strip()) for n in args.prompt.split(",")]
-        print(json.dumps(benchmark(store, args.mode, args.device, prompt, args.tokens, args.pin_mib), indent=2))
+        print(json.dumps(benchmark(store, args.mode, args.device, prompt, args.tokens, args.pin_mib, args.warmups), indent=2))
     elif args.command == "parity":
         a = PhiStreamEngine(store, mode="stream", device=args.device)
         b = PhiStreamEngine(store, mode="resident", device=args.device)

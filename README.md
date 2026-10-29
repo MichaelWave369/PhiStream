@@ -44,6 +44,31 @@ python -m phistream.cli bench artifacts/demo --mode stream --device cuda --pin-m
 python -m phistream.cli bench artifacts/demo --mode resident --device cuda
 ```
 
+## Explicit standalone bench warm-up (opt-in)
+
+A second-machine RTX 5060 / WSL2 report motivated an auditable warm-up
+option for the **synthetic fixture** `bench` command. Historical
+results remain unchanged by default (`--warmups 0`). For new
+warm-condition comparisons, use the same `--warmups 2`, exact prompt,
+fixture seed, pin budget and token count on each machine:
+
+```bash
+python -m phistream.cli bench artifacts/demo --mode stream --device cuda --tokens 8 --warmups 2
+python -m phistream.cli bench artifacts/demo --mode resident --device cuda --tokens 8 --warmups 2
+```
+
+Warm-up passes are **unscored**, each on a fresh engine; the measured
+pass also uses its own fresh engine and CUDA synchronization, with
+only its own generation time/load counters in the receipt. They
+prime memory/driver/runtime and may be influenced by OS file caching.
+This does not change `validate-device`, older receipts, the SmolLM2
+real-weight study, or any production code. See the
+[second-machine replication protocol](docs/SECOND_MACHINE_REPLICATION.md)
+for all four frozen SmolLM2 token-ID prompts and the exact documented
+5070 balanced paired A/B procedure. The reported 5060 synthetic
+throughputs must **not** be compared directly against 5070 real-model
+SINGLE/BATCHED timings.
+
 ## Important benchmark caveats
 
 - Performance on synthetic toy models does not predict performance on 70B or MoE models.
