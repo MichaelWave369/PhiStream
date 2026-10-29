@@ -322,3 +322,15 @@ Default **metadata-only** preflight: `python -m scripts.pocketrotor_lab /path/to
 After E0's bounded tensor-cache pilot, the **default-read-only** [E1 protocol](docs/POCKETROTOR_E1.md) introduces a separate real-checkpoint study. It freezes a 32-step user-declared external reference JSON (not authenticated), complete checkpoint metadata and a balanced three-way sequence for `stream`, `flat-lru`, and `nested-pin`. Every method runs a fresh engine (cold *logical* cache) then the same engine after KV reset (warm *logical* cache). Actual model execution requires a matching on-disk plan, full original checkpoint SHA256 agreement and explicit approval. Sparse-logit and greedy-ID parity must pass on every trial. Three or six balanced rounds and descriptive thresholds support **further review only**, never production or speedup certification. No Ollama, GGUF, MoE or prefetch support added.
 
 Run `python -m scripts.pocketrotor_e1 plan --help` or `python -m scripts.pocketrotor_e1 run --help` for the isolated opt-in operator procedure.
+
+
+## ΦPocketRotor E1-A · Offline independent arithmetic audit
+
+The [E1-A auditor](docs/POCKETROTOR_E1_AUDIT.md) reads an existing E1
+receipt, frozen plan, 32-step reference trace and local checkpoint without
+executing models or querying CUDA. It verifies complete checkpoint SHA256
+bindings, seeded 3/6-round schedule, all 32-step token/probe claim counts,
+cache budget and independently recalculates the paired gain summary. Run
+`python -m scripts.pocketrotor_e1_audit --help`. A successful status
+means **internal evidence consistency only**; GPU execution, reference
+independence and any speedup remain unauthenticated.
