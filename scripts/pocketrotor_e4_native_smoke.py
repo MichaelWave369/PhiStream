@@ -61,6 +61,7 @@ def native_cpu_smoke() -> dict:
         num_experts=256, num_experts_per_tok=8,
         hidden_size=16, moe_intermediate_size=8,
         shared_expert_intermediate_size=8, hidden_act="silu",
+        _experts_implementation="eager",
     )
 
     class OneLayer(nn.Module):
