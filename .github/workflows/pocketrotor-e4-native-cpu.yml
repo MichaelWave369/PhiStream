@@ -1,0 +1,61 @@
+name: PhiPocketRotor E4 Native Qwen CPU Integration
+
+on:
+  pull_request:
+    paths:
+      - "scripts/pocketrotor_e4_native_smoke.py"
+      - "scripts/pocketrotor_e3_qwen35.py"
+      - "scripts/pocketrotor_e3_preflight.py"
+      - "scripts/pocketrotor_e2_route_bridge.py"
+      - "scripts/pocketrotor_e2.py"
+      - ".github/workflows/pocketrotor-e4-native-cpu.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qwen35-real-library-small-cpu:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      HF_HUB_OFFLINE: "1"
+      TRANSFORMERS_OFFLINE: "1"
+      HF_HUB_DISABLE_TELEMETRY: "1"
+      TOKENIZERS_PARALLELISM: "false"
+      CUDA_VISIBLE_DEVICES: ""
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install only CPU runner dependencies (no checkpoints)
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install "transformers==5.21.0"
+          python -m pip install -e . --no-deps
+      - name: Assert offline HF source/native expert-hook parity with synthetic tiny weights
+        run: |
+          python -m scripts.pocketrotor_e4_native_smoke --output /tmp/phipocketrotor-e4-native-cpu.json
+          python - <<'PY'
+          import json
+          x=json.load(open("/tmp/phipocketrotor-e4-native-cpu.json", encoding="utf-8"))
+          assert x["status"]=="REAL_LIBRARY_NATIVE_BLOCK_CPU_HOOK_PARITY_SYNTHETIC_WEIGHTS"
+          assert x["complete_output_parity_with_unhooked_native_block"] is True
+          assert x["observed_native_gate_to_experts_events"] == 32
+          assert x["transformers_version"] == "5.21.0"
+          assert x["real_pretrained_model_executed"] is False
+          assert x["checkpoint_downloaded"] is False
+          assert x["cuda_initialized"] is False
+          assert x["measured_gpu_performance"] is False
+          print("E4 verified: real HF native classes, synthetic tiny CPU weights; no model downloads.")
+          PY
+      - name: Upload small evidence report (no model or user inputs)
+        uses: actions/upload-artifact@v4
+        with:
+          name: pocketrotor-e4-native-cpu-integration
+          path: /tmp/phipocketrotor-e4-native-cpu.json
+          if-no-files-found: error
+          retention-days: 14
