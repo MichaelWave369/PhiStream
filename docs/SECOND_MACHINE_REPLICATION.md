@@ -81,21 +81,21 @@ python -m phistream.cli bench artifacts/hunter-5060-fixture --device cuda --mode
 nvidia-smi --query-gpu=name,driver_version,memory.total,memory.free,temperature.gpu,utilization.gpu --format=csv
 ~~~
 
-In the standalone \`bench\`, \`--warmups 0\` is still the default for
-**historic receipt compatibility**; request \`--warmups 1\` or
-\`--warmups 2\` explicitly in both machines' new runs.
+In the standalone `bench`, `--warmups 0` is still the default for
+**historic receipt compatibility**; request `--warmups 1` or
+`--warmups 2` explicitly in both machines' new runs.
 Each warm-up creates a fresh engine and runs the **same prompt** and
 token count. Each trial uses a separate new engine. CUDA work is
 synchronized outside the timed region before and after generation.
 Warm-up loads, CPU/GPU startup and unscored generation are not included
 in the reported per-trial counters. New receipts declare
-\`warmup_passes_unscored\`, \`timing_scope\`, and parity of generated IDs
+`warmup_passes_unscored`, `timing_scope`, and parity of generated IDs
 between unscored and measured runs.
 
-**Caution:** The \`validate-device\` command retains its historical
+**Caution:** The `validate-device` command retains its historical
 no-explicit-warm-up methodology, so its three mode numbers must NOT be
-compared directly with new warm \`bench\` numbers. Record the exact
-\`--pin-mib\`, number of tokens, and any GPU contention. The **0.15 MiB** budget pins one layer of this exact fixture;
+compared directly with new warm `bench` numbers. Record the exact
+`--pin-mib`, number of tokens, and any GPU contention. The **0.15 MiB** budget pins one layer of this exact fixture;
 `0.125 MiB` pins none. Repeat-mode receipts include each trial,
 mean/min/max/median/sample standard deviation and CV. Each has
 torch free/total VRAM and best-effort `nvidia-smi` readings before
@@ -111,16 +111,16 @@ conditions.
 ## B. The *different* pretrained SmolLM2-135M experiment
 
 The RTX 5070 study uses **a real local BF16 safetensors model**:
-\`HuggingFaceTB/SmolLM2-135M-Instruct\`, revision
-\`12fd25f77366fa6b3b4b768ec3050bf629380bac\`.
+`HuggingFaceTB/SmolLM2-135M-Instruct`, revision
+`12fd25f77366fa6b3b4b768ec3050bf629380bac`.
 Original 5070 local path (not valid on WSL without adjusting):
-\`D:\PhiStream\Models\SmolLM2-135M-Instruct\`.
+`D:\PhiStream\Models\SmolLM2-135M-Instruct`.
 
 The PR21 frozen **literal-token** workloads (not English text):
-- \`short_1\`: \`1\`
-- \`mixed_7\`: \`9,28,7,139,302,900,4096\`
-- \`repeat_12\`: \`42,42,42,42,42,42,13,13,13,13,1,1\`
-- \`spread_24\`: \`495,871,1604,2361,3141,4004,5127,6203,7129,8261,9347,10589,11827,13219,14641,15883,17257,18631,19937,21247,22621,23917,25127,26393\`
+- `short_1`: `1`
+- `mixed_7`: `9,28,7,139,302,900,4096`
+- `repeat_12`: `42,42,42,42,42,42,13,13,13,13,1,1`
+- `spread_24`: `495,871,1604,2361,3141,4004,5127,6203,7129,8261,9347,10589,11827,13219,14641,15883,17257,18631,19937,21247,22621,23917,25127,26393`
 
 All cases evaluate **32 greedy continuation tokens**, with a
 separately executed Hugging Face reference and a SHA-bound PhiStream
@@ -128,15 +128,22 @@ parity receipt for each case. See [four-case exact PowerShell protocol]
 (REAL_WEIGHT_MATRIX.md).
 
 The 5070's *later* balanced paired comparison is different again:
-three nontrivial cases (\`mixed_7\`, \`repeat_12\`, \`spread_24\`);
+three nontrivial cases (`mixed_7`, `repeat_12`, `spread_24`);
 four paired repetitions per case, seed 369, one unscored warmup
 per mode, with randomized balanced order and per-trial reference
 parity. The original code and exact parameterized CLI form are in
 [paired A/B protocol](PAIRED_REAL_PREFILL_AB.md) and
 [three-case audit](THREE_CASE_AB_CENSUS.md).
 
+**STOP: RTX 5070 HISTORICAL COMMAND ONLY. Do not copy or execute the
+following 8192 MiB example on Hunter's 8 GB RTX 5060, especially with
+DeepSeek running.** This is an archived illustration of the original
+5070 protocol, not a safe recipe for a second machine. Real-model runs
+need separate approval, machine-specific preflight, and explicit
+memory-policy review *before* any copyable execution command.
+
 The following is an **illustrative PowerShell command from the
-published 5070 protocol**, NOT a verified transcript of what was
+published RTX 5070 protocol**, NOT a verified transcript of what was
 actually typed on Hunter's machine:
 
 ~~~powershell
@@ -148,12 +155,12 @@ $run = Join-Path (Join-Path $matrixDir "batched-prefill") "paired-ab-run_$case.j
 py -m scripts.paired_real_prefill_ab run --checkpoint "$ckpt" --preflight-receipt "$preflight" --matrix-dir "$matrixDir" --case "$case" --pairs 4 --seed 369 --warmups 1 --device cuda --capacity-mib 8192 --reserve-mib 1024 --approve-local-execution --output "$run"
 ~~~
 
-**Do not paste this command onto a busy 8GB 5060.** It was designed
+**The historical 8192 MiB sample above is not 5060-ready.** It was designed
 for the existing 5070 evidence and paths; the new machine must first
 obtain the weights voluntarily, create its own SHA-bound preflight,
 independently execute all references, pass the four-case baseline,
 build new batched-candidate receipts, and pass the local planning
-gate. In particular, \`--capacity-mib 8192\` does not make 8GB free
+gate. In particular, `--capacity-mib 8192` does not make 8GB free
 when other processes occupy ~6GB. No automated model download, CLI
 run, path assumption or memory policy bypass is authorized here.
 
@@ -172,21 +179,104 @@ python -m phistream.cli real-model-gate "$CKPT" --device cuda \
   --source HuggingFaceTB/SmolLM2-135M-Instruct \
   --revision 12fd25f77366fa6b3b4b768ec3050bf629380bac \
   --license-id Apache-2.0 \
-  --output "benchmarks/local/smolllm2-cuda-preflight-$(date +%Y%m%d-%H%M%S).json"
+  --output "benchmarks/local/smollm2-cuda-preflight-$(date +%Y%m%d-%H%M%S).json"
 ```
 
-The output name is illustrative; the status must be checked against
-`PREFLIGHT_REVIEW_REQUIRED`, with model execution false and
-SHA-256 entries for both `config.json` and `model.safetensors`.
+The output name is illustrative. **Acceptance requires every one** of
+the following, as enforced by `scripts/export_hf_reference.py`'s
+`check_checkpoint` routine:
+
+- Receipt schema matches the expected real-model preflight schema,
+  `status == PREFLIGHT_REVIEW_REQUIRED`, and the memory preflight status
+  is `REVIEW_REQUIRED`.
+- `model_execution == false`, `double_buffer_enabled == false`,
+  and `scheduler_policy_applied == false`.
+- Checkpoint `format == SAFETENSORS` and `model_type == llama`.
+  The local `config.json` must also conform to the bounded Llama
+  architecture contract.
+- A nonempty, user-declared model **source, revision, and license_id**
+  are present, marked as **not independently verified**.
+- `checkpoint_fingerprint.algorithm == sha256` and the fingerprint
+  names **exactly** `config.json` and `model.safetensors` with valid
+  SHA-256 digests. The independent reference helper rehashes both
+  existing local files and rejects mismatches.
+
+For SmolLM2-135M-Instruct revision
+`12fd25f77366fa6b3b4b768ec3050bf629380bac`, the published 5070
+receipt lists these comparison values:
+
+- `config.json`:
+  `8eb740e8bbe4cff95ea7b4588d17a2432deb16e8075bc5828ff7ba9be94d982a`
+- `model.safetensors`:
+  `5af571cbf074e6d21a03528d2330792e532ca608f24ac70a143f6b369968ab8c`
+
+Matching both digests establishes identical **file bytes** between
+receipts; it does not authenticate the publisher, model training
+history, or any real-model execution.
 A preflight receipt is not consent to the separately gated reference
-or PhiStream real-weight runs. The 1600 MiB capacity is **only a scenario
-example**, not a guarantee of fit on a contested WSL2 GPU. The
+or PhiStream real-weight runs. The 1600 MiB capacity is **only an operator-chosen memory policy
+scenario**, not a guarantee of fit on a contested WSL2 GPU. It may
+even exceed the available amount from nvidia-smi when DeepSeek is
+loaded: re-measure and apply the **more conservative credible**
+free-memory limit before any separately authorized execution.
+The CUDA policy reads `torch.cuda.mem_get_info`; on this WSL2 host
+that reading contradicts nvidia-smi, so neither the reported pass
+nor the displayed free bytes guarantee safety. The
 published 5070 hashes are documented in the external-reference lab.
 Preserve every receipt. No real SmolLM2 model run is claimed here.
 
+## B2. Independent review of PR #42 on RTX 5060, October 29, 2026
+
+Hunter's Claude supplied a separate **14,698-byte verification ZIP**
+(`20261029-phistream-pr42-verify-claude.zip`) after merging PR #42.
+Its SHA-256 was independently checked against the reported digest:
+
+`934ceba7119e8351d817ccb810980c0bf3ea2415891a55b06de62c08d5345de8`
+
+The archive's `receipts.sha256` matches all six listed JSON files.
+The seven individual throughput trial values in each of the four
+mode receipts were independently recomputed; their medians and
+sample-stdev / mean coefficients of variation match the stored
+summaries. All seven trials of each mode have unchanged generated
+token IDs. Each receipt records one two-pass warm-up before the first
+measured trial, then six more fresh-engine measured generations.
+These are **checks of internally consistent third-party artifacts**,
+not independently witnessed GPU execution.
+
+| Mode (all synthetic) | Median tok/s | CV | Pinned layers | Measured loaded bytes |
+| --- | ---: | ---: | ---: | ---: |
+| STREAM | 117.0 | 31% | 0 | 5,984,512 |
+| STREAM with 0.125 MiB | 105.4 | 32% | 0 (warned) | 5,984,512 |
+| STREAM with 0.15 MiB | 99.7 | 46% | 1 | 4,652,800 |
+| RESIDENT | 163.2 | 30% | 4 | 657,664 |
+
+The supplied `verify.json` reports checksum verification of 39
+fixture tensors; `parity.json` reports exact synthetic CUDA output
+parity (max absolute logit delta 0.0). The accompanying report says
+**323 tests passed** on the merged commit
+`b5c4b32343d1de0b1cad07df067b48722f0b50c4`. That count comes
+from the collaborator's report, not an independently witnessed test
+run on the 5060. The archived `fixture.sha256` records the synthetic
+seed-369 fixture's manifest and weight hashes.
+
+Hardware context was unstable: the new receipt's
+`torch.cuda.mem_get_info` reported around 6.99 GB free while
+`nvidia-smi` reported around 6,628 MiB used of 8,151 MiB. On this
+shared WSL2 machine those readings conflict and **must not** be
+combined into a fabricated estimate. The relative throughput
+differences varied strongly from the previous session, including
+a one-layer-pinned median **below** plain STREAM. Record the transfer
+counters as descriptive and do not certify a speedup.
+
+Claude's patch comparison reports no missing functional fixes after
+our integration, with one hardened field-count check in
+`nvidia-smi` parsing. The full ZIP is **operator-supplied evidence
+held outside the public repository**; we do not publish the remote
+system's raw metadata or imply independent checkpoint provenance.
+
 ## C. What receipts to exchange
 
-Share **copies** of \`validate-cuda-5060.json\`, both standalone bench
+Share **copies** of `validate-cuda-5060.json`, both standalone bench
 JSON files, plus subsequent cold/warm JSONs. Include the fixture
 manifest hash, exact commit SHA, Torch/CUDA build, WSL2/driver details,
 VRAM free before each timed group, and complete CUDA error logs if
