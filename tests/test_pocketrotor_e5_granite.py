@@ -19,6 +19,7 @@ class GraniteMoeTopKRouter(nn.Module):
     def forward(self, x):
         start = int(abs(x[0, 0, 0].item())) % 24
         ids = torch.arange(start, start + 8, dtype=torch.int64).reshape(1, 8)
+        ids = ids.repeat(x.shape[0] * x.shape[1], 1)
         return torch.zeros((1, 32)), torch.ones((1, 8)), ids
 
 
