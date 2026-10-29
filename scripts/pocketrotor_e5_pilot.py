@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 from hashlib import sha256
+import hmac
 import json
 from pathlib import Path
 from types import SimpleNamespace
@@ -22,6 +23,9 @@ SCHEMA = "PHISTREAM_POCKETROTOR_E5_PILOT_RECEIPT_V1"
 VERSION = "5.21.0"
 MODEL_ID = "ibm-granite/granite-3.0-1b-a400m-instruct"
 MODEL_REVISION = "23d6629dbac8c0a0652f28991f62bb75157c02e3"
+# Published Hugging Face file metadata for the exact pinned revision.
+# https://huggingface.co/ibm-granite/granite-3.0-1b-a400m-instruct/blob/23d6629dbac8c0a0652f28991f62bb75157c02e3/model.safetensors
+EXPECTED_CHECKPOINT_SHA256 = "f7ae1cee56a9ea6c5360437b1c0407f8d84816b2cc75470f4e7e5236fa2a07dc"
 MAX_WEIGHT_BYTES = 3 * 1024**3
 SPLIT_STEPS = {"train": 32, "same_family": 16, "shifted": 16}
 PUBLIC_TEXT = {
@@ -149,6 +153,18 @@ def _sha_file(path: Path) -> str:
     return h.hexdigest()
 
 
+def require_pinned_checkpoint_sha(actual: str) -> None:
+    """Fail closed before deserializing a mismatched or corrupted checkpoint.
+
+    A published SHA binds bytes to a file in one pinned public revision.
+    It does not independently establish who authored or trained the model.
+    """
+    if not isinstance(actual, str) or not hmac.compare_digest(
+        actual, EXPECTED_CHECKPOINT_SHA256
+    ):
+        raise ValueError("Pinned Granite checkpoint SHA256 mismatch; refuse model load")
+
+
 def _pretrained(model_dir: Path) -> tuple[dict, dict]:
     import torch
     import transformers
@@ -178,6 +194,7 @@ def _pretrained(model_dir: Path) -> tuple[dict, dict]:
         raise RuntimeError("Expected bounded public single-shard safetensors checkpoint")
     weight_bytes = target.stat().st_size
     checkpoint_hash = _sha_file(target)
+    require_pinned_checkpoint_sha(checkpoint_hash)
     conf = AutoConfig.from_pretrained(
         str(snapshot), local_files_only=True, trust_remote_code=False)
     if (conf.model_type != "granitemoe"
@@ -287,6 +304,8 @@ def _pretrained(model_dir: Path) -> tuple[dict, dict]:
         "model_id": MODEL_ID, "pinned_revision": MODEL_REVISION,
         "transformers_version": VERSION,
         "checkpoint_safetensors_sha256": checkpoint_hash,
+        "checkpoint_sha256_matches_pinned_hf_digest": True,
+        "checkpoint_published_sha256": EXPECTED_CHECKPOINT_SHA256,
         "checkpoint_weight_bytes_hashed": weight_bytes,
         "expert_weight_bytes_per_layer_measured_from_params": expert_bytes,
         "native_router_consumer_parity": True,
