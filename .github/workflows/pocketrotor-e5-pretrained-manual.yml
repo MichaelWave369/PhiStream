@@ -1,0 +1,73 @@
+name: PhiPocketRotor E5 Pretrained IBM Granite Route Pilot
+
+# Manual only. Explicitly authorizes roughly 2.67 GB public model download.
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_download:
+        description: "Authorize ~2.67 GB pretrained IBM Granite weights on GitHub CPU"
+        required: true
+        default: "DO_NOT_RUN"
+        type: choice
+        options:
+          - DO_NOT_RUN
+          - AUTHORIZE_IBM_GRANITE_2_67GB_CPU_DOWNLOAD
+
+permissions:
+  contents: read
+
+jobs:
+  real-pretrained-native-router-capture:
+    if: inputs.confirm_download == 'AUTHORIZE_IBM_GRANITE_2_67GB_CPU_DOWNLOAD'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      CUDA_VISIBLE_DEVICES: ""
+      HF_HUB_DISABLE_TELEMETRY: "1"
+      TOKENIZERS_PARALLELISM: "false"
+      HF_HUB_DISABLE_PROGRESS_BARS: "1"
+      OMP_NUM_THREADS: "2"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install pinned Python model runtime (CPU only)
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install "transformers==5.21.0"
+          python -m pip install -e . --no-deps
+      - name: Explicitly run bounded pretrained Granite teacher-forced native capture
+        run: |
+          mkdir -p /tmp/pocketrotor-e5-model /tmp/pocketrotor-e5-evidence
+          python -m scripts.pocketrotor_e5_pilot pretrained --authorize-download \
+            --model-dir /tmp/pocketrotor-e5-model \
+            --report-output /tmp/pocketrotor-e5-evidence/pretrained-report.json \
+            --capture-output /tmp/pocketrotor-e5-evidence/native-route-capture.json
+          python - <<'PY'
+          import json
+          root="/tmp/pocketrotor-e5-evidence/"
+          report=json.load(open(root+"pretrained-report.json", encoding="utf-8"))
+          capture=json.load(open(root+"native-route-capture.json", encoding="utf-8"))
+          assert report["status"] == "OPERATOR_REPORTED_REAL_PRETRAINED_GRANITE_NATIVE_ROUTING"
+          assert report["bitwise_first_token_output_parity"]
+          assert report["checkpoint_weight_bytes_hashed"] > 0
+          assert report["native_events"] == 1536
+          assert report["real_inference_speedup_proven"] is False
+          assert report["frozen_public_teacher_forced_text_only"]
+          assert capture["source"]["kind"] == "operator_asserted_native"
+          assert capture["source"]["token_text_recorded"] is False
+          assert len(capture["events"]) == 1536
+          print("E5 real checkpoint route capture complete; NO speedup claim")
+          PY
+      - name: Upload only routing IDs and evidence receipts, no model or text data
+        uses: actions/upload-artifact@v4
+        with:
+          name: pocketrotor-e5-pretrained-router-evidence
+          path: |
+            /tmp/pocketrotor-e5-evidence/pretrained-report.json
+            /tmp/pocketrotor-e5-evidence/native-route-capture.json
+          if-no-files-found: error
+          retention-days: 14
