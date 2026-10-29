@@ -107,6 +107,8 @@ jobs:
           python -m scripts.pocketrotor_e2 evaluate --trace /tmp/pocketrotor-e2r-layer1.json > /tmp/pocketrotor-e2r-analysis.json
       - name: PocketRotor E3 Qwen3.5 native hook import contract (no model loads)
         run: python -c "from scripts.pocketrotor_e3_qwen35 import Qwen35NativeRouterCapture; print(Qwen35NativeRouterCapture.__name__)"
+      - name: PocketRotor E3-P offline Qwen3.5 static preflight help (no imports)
+        run: python -m scripts.pocketrotor_e3_preflight --help
       - name: Reproducible synthetic fixture
         run: |
           python -m phistream.cli init-fixture /tmp/phistream-ci-fixture
