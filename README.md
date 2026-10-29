@@ -299,6 +299,22 @@ When separately approved and actually run, the comparator reports time-to-first 
 
 A standalone validation-only script, `scripts/export_hf_reference.py`, creates a genuine **second-runtime** 32-step greedy/reference-logit trace using a previously installed Hugging Face Transformers runtime, without adding Transformers as a PhiStream dependency or importing any `phistream` code into the external oracle. Its **default mode rehashes only** an explicitly selected existing local canonical Llama single-shard checkpoint against a prior `real-model-gate --hash-checkpoint` receipt. Real reference execution requires `--run-reference --approve-local-execution --device cpu|cuda --output NEW.json`; loading is strictly offline/local, with FP32 eager no-cache full-sequence inference and post-execution SHA check. Weights and Ollama settings are untouched. The separate PhiStream decoder's user-authorized comparison is a second, independent step. No measured SmolLM2 parity is claimed by CI. See [External Reference Lab](docs/EXTERNAL_REFERENCE_LAB.md).
 
+## External RTX 5060 SmolLM2 pretrained replication (read-only receipt audit)
+
+An operator-supplied, SHA-256-bound October 29, 2026 archive records
+**128/128 greedy tokens and 1,147/1,147 sampled logit probes** matching
+a user-declared independent Hugging Face reference on Hunter's RTX 5060.
+All three frozen four-pair SINGLE/BATCHED experiments report 4/4
+candidate faster pairs, but the `spread_24` timing overlaps an
+unexpected competing model reload, and no production speedup is claimed.
+A standalone standard-library **offline external receipt auditor**
+checks the archive, frozen prompts, SHA-linked receipts, full per-trial
+parity and recomputed descriptive statistics without touching model
+weights, devices, the network or the default SINGLE scheduler.
+See [RTX 5060 pretrained evidence review](docs/SMOLLM2_5060_INDEPENDENT_AUDIT.md).
+Matching receipt hashes is **not** independent proof of actual GPU
+execution, model origin or statistically significant timing gains.
+
 ## PR #21 · Four-case real-weight validation matrix
 
 The initial real SmolLM2-135M-Instruct CUDA comparison matched **32/32 reference greedy IDs and 288/288 sampled logits** (reference independence/source remain user-declared). Because 29 target IDs were the same token, this is limited evidence. [Four-case validation protocol](docs/REAL_WEIGHT_MATRIX.md) freezes four varied prompts and requires four independently executed 32-step external reference JSONs plus four separately consented PhiStream real-model CUDA parity receipts. Each receipt now includes the **SHA256 of the exact external reference JSON**, checked by a strictly offline matrix reviewer. The matrix refuses incomplete/swapped evidence, annotates output diversity, and **never promotes double buffering or production readiness**. No real matrix evidence is claimed in CI; all new negative-control tests use mocked data.
