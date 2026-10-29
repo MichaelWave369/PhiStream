@@ -348,3 +348,18 @@ load is charged to the declared byte budget. Run
 **No pretrained MoE inference, real GPU transfer, scheduling speedup,
 quantization, or router modification is claimed.** The canonical Llama
 decoder, E0/E1/E1-A and production flags are unchanged.
+
+
+## ΦPocketRotor E2-R · Per-Layer Native Router Capture Bridge
+
+The [E2-R protocol](docs/POCKETROTOR_E2_ROUTE_BRIDGE.md) adds an
+explicit post-router *event recorder interface* and standard-library-only
+conversion into E2's finite expert-cache replay format. It strictly
+validates layer and step continuity, training/holdout separation, small
+uniform expert groups, privacy-safe metadata and source SHA256 bindings.
+Each layer is exported separately to avoid fabricating cross-layer
+transitions. A conversion manifest labels source identity as
+**operator-asserted, unauthenticated**. The CLI **does not** load or
+instrument any pretrained model; actual native routing IDs must be
+provided by a separately reviewed, locally controlled runtime.
+No Qwen/Ollama/GGUF support or physical weight movement is added.
