@@ -98,6 +98,13 @@ jobs:
         run: |
           python -m scripts.pocketrotor_e2 --help
           python -m scripts.pocketrotor_e2 demo > /tmp/pocketrotor-e2-trace-demo.json
+      - name: PocketRotor E2-R native route capture bridge CLI and synthetic round-trip
+        run: |
+          python -m scripts.pocketrotor_e2_route_bridge --help
+          python -m scripts.pocketrotor_e2_route_bridge demo --output /tmp/pocketrotor-e2r-demo.json
+          python -m scripts.pocketrotor_e2_route_bridge inspect --input /tmp/pocketrotor-e2r-demo.json > /tmp/pocketrotor-e2r-inspect.json
+          python -m scripts.pocketrotor_e2_route_bridge convert --input /tmp/pocketrotor-e2r-demo.json --layer 1 --expert-bytes 4096 --capacity-bytes 16384 --max-prefetch 1 --trace-output /tmp/pocketrotor-e2r-layer1.json --manifest-output /tmp/pocketrotor-e2r-layer1-manifest.json
+          python -m scripts.pocketrotor_e2 evaluate --trace /tmp/pocketrotor-e2r-layer1.json > /tmp/pocketrotor-e2r-analysis.json
       - name: Reproducible synthetic fixture
         run: |
           python -m phistream.cli init-fixture /tmp/phistream-ci-fixture
