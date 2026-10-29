@@ -39,7 +39,7 @@ class SecondMachineProtocolDocTests(unittest.TestCase):
     def test_real_weight_procedure_is_separately_authorized(self):
         self.assertIn("separate operator approval", self.body)
         self.assertIn("not a guarantee of fit", self.body)
-        self.assertIn("explicitly authorized execution", self.body.lower())
+        self.assertIn("separately authorized execution", self.body.lower())
         self.assertIn("no real SmolLM2 model run", self.body)
 
     def test_independent_bundle_binding_and_limitations(self):
