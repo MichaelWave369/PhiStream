@@ -408,3 +408,26 @@ against unhooked execution, and converts the trace through E2-R/E2.
 This does **not** download a pretrained checkpoint, touch Ollama,
 execute a 35B model or claim real-world speedups. Evidence is explicitly
 labeled a synthetic-weight real-library integration smoke test.
+
+
+## ΦPocketRotor E5 · Pretrained Granite Native Router Pilot
+
+[E5's protocol](docs/POCKETROTOR_E5_PRETRAINED.md) extends beyond the
+E4 synthetic-weight Qwen3.5 integration: a guarded **Granite MoE
+native-router hook** cross-checks original expert selections against
+the indices consumed by the genuine experts module. A separate PR
+workflow runs tiny synthetic CPU weights using the actual Granite
+classes without downloading a checkpoint.
+
+An independently opted-in **manual-only**
+[pretrained-model workflow](.github/workflows/pocketrotor-e5-pretrained-manual.yml)
+can download IBM's pinned, public
+`granite-3.0-1b-a400m-instruct` safetensors checkpoint (~2.67 GB)
+on a disposable GitHub CPU runner. It collects actual routed IDs
+from 32 teacher-forced train steps and two disjoint 16-step holdouts
+on fixed public text, compares hooked/unhooked first-token outputs,
+hashes the checkpoint, measures expert tensor byte sizes, and runs
+the E2 cache policies for selected layers. **The manual pretrained
+download is NOT started by a merge, push or PR.** Until manually
+executed successfully it is just an unrun protocol, not evidence
+of pretrained routing or GPU speedup.
