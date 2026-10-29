@@ -334,3 +334,17 @@ cache budget and independently recalculates the paired gain summary. Run
 `python -m scripts.pocketrotor_e1_audit --help`. A successful status
 means **internal evidence consistency only**; GPU execution, reference
 independence and any speedup remain unauthenticated.
+
+
+## ΦPocketRotor E2 · Offline Nested Expert Trace Laboratory
+
+The [E2 protocol](docs/POCKETROTOR_E2.md) adds a **standard-library-only,
+trace-replay** experiment for future Mixture-of-Experts residency. It compares
+finite-capacity flat LRU, global-frequency, flat one-step Markov, and
+nested-bubble predictors on frozen training routes and separate same-family /
+shifted holdout routes. Every speculative transfer, cache eviction and on-demand
+load is charged to the declared byte budget. Run
+`python -m scripts.pocketrotor_e2 demo` or inspect its JSON result.
+**No pretrained MoE inference, real GPU transfer, scheduling speedup,
+quantization, or router modification is claimed.** The canonical Llama
+decoder, E0/E1/E1-A and production flags are unchanged.
