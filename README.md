@@ -299,6 +299,20 @@ When separately approved and actually run, the comparator reports time-to-first 
 
 A standalone validation-only script, `scripts/export_hf_reference.py`, creates a genuine **second-runtime** 32-step greedy/reference-logit trace using a previously installed Hugging Face Transformers runtime, without adding Transformers as a PhiStream dependency or importing any `phistream` code into the external oracle. Its **default mode rehashes only** an explicitly selected existing local canonical Llama single-shard checkpoint against a prior `real-model-gate --hash-checkpoint` receipt. Real reference execution requires `--run-reference --approve-local-execution --device cpu|cuda --output NEW.json`; loading is strictly offline/local, with FP32 eager no-cache full-sequence inference and post-execution SHA check. Weights and Ollama settings are untouched. The separate PhiStream decoder's user-authorized comparison is a second, independent step. No measured SmolLM2 parity is claimed by CI. See [External Reference Lab](docs/EXTERNAL_REFERENCE_LAB.md).
 
+## Day-two SmolLM2 controlled replication: preregistered design (no execution)
+
+Following the externally reported first-day RTX 5060 real-weight parity
+and A/B receipt audit, [the frozen day-two protocol](docs/SMOLLM2_5060_DAY2_PREREGISTRATION.md) predeclares master seed
+`4277796034`, eight balanced SINGLE/BATCHED pairs for each of the
+three nontrivial frozen prompts, and conservative `UNKNOWN` vs
+`CONTENDED` GPU-observation rules. The read-only
+`scripts.smollm2_day2_prereg` generator creates a stable JSON manifest.
+**No GPU watch/approved-model run is implemented or authorized by this
+preregistration.** The one-second GPU observer, trial timestamps and
+day-two ZIP auditor require separate implementation, tests, owner
+authorization, and a reviewed memory window. The original SINGLE
+scheduler remains unchanged.
+
 ## External RTX 5060 SmolLM2 pretrained replication (read-only receipt audit)
 
 An operator-supplied, SHA-256-bound October 29, 2026 archive records
