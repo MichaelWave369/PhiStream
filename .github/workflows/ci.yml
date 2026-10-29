@@ -88,6 +88,10 @@ jobs:
           python -m scripts.weight_stage_audit --help
       - name: PocketRotor E0 read-only lab CLI (CPU synthetic tests in suite)
         run: python -m scripts.pocketrotor_lab --help
+      - name: PocketRotor E1 offline balanced research CLI contracts
+        run: |
+          python -m scripts.pocketrotor_e1 plan --help
+          python -m scripts.pocketrotor_e1 run --help
       - name: Reproducible synthetic fixture
         run: |
           python -m phistream.cli init-fixture /tmp/phistream-ci-fixture
