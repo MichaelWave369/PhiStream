@@ -77,7 +77,7 @@ class PocketRotorE1AuditTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Summary arithmetic"):
             self.review(receipt=self.modified(bad, "bad-timing.json"))
         bad = copy.deepcopy(self.raw)
-        bad["summary"]["nested_candidate_for_further_review"] = True
+        bad["summary"]["nested_candidate_for_further_review"] = not bad["summary"]["nested_candidate_for_further_review"]
         with self.assertRaisesRegex(ValueError, "Summary arithmetic"):
             self.review(receipt=self.modified(bad, "bad-conclusion.json"))
 
