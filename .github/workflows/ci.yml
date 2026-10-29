@@ -94,6 +94,10 @@ jobs:
           python -m scripts.pocketrotor_e1 run --help
       - name: PocketRotor E1-A offline audit help (CPU synthetic tests in suite)
         run: python -m scripts.pocketrotor_e1_audit --help
+      - name: PocketRotor E2 synthetic predictive expert trace laboratory
+        run: |
+          python -m scripts.pocketrotor_e2 --help
+          python -m scripts.pocketrotor_e2 demo > /tmp/pocketrotor-e2-trace-demo.json
       - name: Reproducible synthetic fixture
         run: |
           python -m phistream.cli init-fixture /tmp/phistream-ci-fixture
