@@ -54,6 +54,8 @@ jobs:
           assert report["status"] == "OPERATOR_REPORTED_REAL_PRETRAINED_GRANITE_NATIVE_ROUTING"
           assert report["bitwise_first_token_output_parity"]
           assert report["checkpoint_weight_bytes_hashed"] > 0
+          assert report["checkpoint_sha256_matches_pinned_hf_digest"] is True
+          assert report["checkpoint_safetensors_sha256"] == "f7ae1cee56a9ea6c5360437b1c0407f8d84816b2cc75470f4e7e5236fa2a07dc"
           assert report["native_events"] == 1536
           assert report["real_inference_speedup_proven"] is False
           assert report["frozen_public_teacher_forced_text_only"]
