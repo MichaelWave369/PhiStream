@@ -105,6 +105,8 @@ jobs:
           python -m scripts.pocketrotor_e2_route_bridge inspect --input /tmp/pocketrotor-e2r-demo.json > /tmp/pocketrotor-e2r-inspect.json
           python -m scripts.pocketrotor_e2_route_bridge convert --input /tmp/pocketrotor-e2r-demo.json --layer 1 --expert-bytes 4096 --capacity-bytes 16384 --max-prefetch 1 --trace-output /tmp/pocketrotor-e2r-layer1.json --manifest-output /tmp/pocketrotor-e2r-layer1-manifest.json
           python -m scripts.pocketrotor_e2 evaluate --trace /tmp/pocketrotor-e2r-layer1.json > /tmp/pocketrotor-e2r-analysis.json
+      - name: PocketRotor E3 Qwen3.5 native hook import contract (no model loads)
+        run: python -c "from scripts.pocketrotor_e3_qwen35 import Qwen35NativeRouterCapture; print(Qwen35NativeRouterCapture.__name__)"
       - name: Reproducible synthetic fixture
         run: |
           python -m phistream.cli init-fixture /tmp/phistream-ci-fixture
