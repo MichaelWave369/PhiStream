@@ -40,7 +40,7 @@ class SecondMachineProtocolDocTests(unittest.TestCase):
         self.assertIn("separate operator approval", self.body)
         self.assertIn("not a guarantee of fit", self.body)
         self.assertIn("separately authorized execution", self.body.lower())
-        self.assertIn("no real SmolLM2 model run", self.body)
+        self.assertIn("no real smollm2 model run", self.body.lower())
 
     def test_independent_bundle_binding_and_limitations(self):
         self.assertIn(
