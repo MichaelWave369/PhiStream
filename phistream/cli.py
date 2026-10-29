@@ -6,12 +6,70 @@ from datetime import datetime, timezone
 import json
 import gc
 import platform
+import shutil
+import statistics
+import subprocess
 import time
 
 import torch
 
 from .engine import PhiStreamEngine
 from .format import ModelConfig, ModelStore, build_fixture
+
+
+def _layer_parameter_bytes(store: ModelStore) -> list[int]:
+    from .engine import BLOCK_NAMES
+    return [sum(store.entries[f"layer.{i}.{n}"]["nbytes"] for n in BLOCK_NAMES)
+            for i in range(store.config.n_layers)]
+
+
+def _pin_report(store: ModelStore, mode: str, pin_budget_mib: float,
+                pinned_count: int) -> dict:
+    """Explain pin budgets; refuse to disguise zero-layer pinning as an optimization."""
+    sizes = _layer_parameter_bytes(store)
+    budget_bytes = int(pin_budget_mib * 1024 * 1024)
+    smallest = min(sizes) if sizes else None
+    warning = None
+    if mode == "stream" and budget_bytes > 0 and pinned_count == 0 and smallest:
+        warning = (f"PIN_BUDGET_PINS_ZERO_LAYERS: budget {budget_bytes} bytes "
+                   f"({pin_budget_mib} MiB) < smallest layer {smallest} bytes; "
+                   f"use --pin-mib >= {smallest / (1024 * 1024):.6f} to pin one layer. "
+                   "This run is equivalent to plain streaming.")
+    return {"pin_budget_bytes": budget_bytes,
+            "layer_parameter_bytes_min": smallest,
+            "layer_parameter_bytes_max": max(sizes) if sizes else None,
+            "min_pin_mib_for_one_layer": round(smallest / (1024 * 1024), 6) if smallest else None,
+            "pin_warning": warning}
+
+
+def _gpu_telemetry(device: torch.device) -> dict | None:
+    """Torch plus optional nvidia-smi device readings, untrusted if they disagree.
+
+    The external query is best effort, no shell, fixed command/fields, and its
+    output is metadata only. On WSL2 torch and nvidia-smi may have different
+    accounting; neither reading is silently substituted for the other.
+    """
+    if device.type != "cuda":
+        return None
+    idx = device.index if device.index is not None else torch.cuda.current_device()
+    free, total = torch.cuda.mem_get_info(idx)
+    out = {"gpu_free_bytes": int(free), "gpu_total_bytes": int(total),
+           "nvidia_smi": None}
+    exe = shutil.which("nvidia-smi")
+    if exe:
+        fields = ("memory.used", "memory.total", "utilization.gpu", "temperature.gpu",
+                  "clocks.sm", "clocks.mem", "power.draw", "pstate")
+        try:
+            row = subprocess.run(
+                [exe, f"--id={idx}", "--query-gpu=" + ",".join(fields),
+                 "--format=csv,noheader,nounits"],
+                capture_output=True, text=True, timeout=5, check=True).stdout.strip()
+            values = [v.strip() for v in row.split(",")]
+            if len(values) == len(fields):
+                out["nvidia_smi"] = dict(zip(fields, values))
+        except (OSError, subprocess.SubprocessError):
+            pass
+    return out
 
 
 def benchmark(store: ModelStore, mode: str, device: str,
@@ -32,6 +90,9 @@ def benchmark(store: ModelStore, mode: str, device: str,
         type(t) is not int for t in prompt
     ):
         raise ValueError("prompt must be nonempty integer token ID list")
+    telemetry_device = torch.device(
+        ("cuda" if torch.cuda.is_available() else "cpu") if device == "auto" else device)
+    gpu_before = _gpu_telemetry(telemetry_device)
     warm_tokens: list[list[int]] = []
     for _ in range(warmups):
         warming = PhiStreamEngine(
@@ -52,6 +113,8 @@ def benchmark(store: ModelStore, mode: str, device: str,
     if any(ids != tokens for ids in warm_tokens):
         raise ValueError("Warmup and measured greedy token IDs differ")
     c = engine.counters
+    gpu_after = _gpu_telemetry(engine.device)
+    pin = _pin_report(store, mode, pin_budget_mib, len(engine.pinned))
     return {
         "date_utc": datetime.now(timezone.utc).isoformat(),
         "provenance": "MEASURED_ON_THIS_MACHINE_SYNTHETIC_UNTRAINED",
@@ -64,6 +127,8 @@ def benchmark(store: ModelStore, mode: str, device: str,
         "config": vars(store.config), "model_weight_bytes": store.bytes_total,
         "pin_budget_mib": pin_budget_mib, "pinned_layer_count": len(engine.pinned),
         "pinned_layer_parameter_bytes": engine.pinned_parameter_bytes,
+        **pin,
+        "gpu_telemetry_before": gpu_before, "gpu_telemetry_after": gpu_after,
         "prompt_token_ids": prompt, "generated_token_ids": tokens,
         "total_seconds": round(elapsed, 6),
         "generated_tokens_per_second_end_to_end": round(n_tokens / elapsed, 6) if elapsed else None,
@@ -72,6 +137,45 @@ def benchmark(store: ModelStore, mode: str, device: str,
         "weight_load_seconds": round(c.load_seconds, 6),
         "peak_cuda_allocated_bytes": c.peak_cuda_allocated_bytes,
         "interpretation": "Toy parity/performance fixture, not a usable language model or large-model benchmark",
+    }
+
+
+def benchmark_repeated(store: ModelStore, mode: str, device: str,
+                       prompt: list[int], n_tokens: int, pin_budget_mib: float,
+                       warmups: int = 0, repeats: int = 5) -> dict:
+    """N separate measured engines in one process, warmups once before trial 1.
+
+    Report all trials and spread, rather than claiming noisy medians are stable.
+    The original non-repeated bench format is unchanged when --repeats 1.
+    """
+    if type(repeats) is not int or not 2 <= repeats <= 50:
+        raise ValueError("repeats must be an integer from 2 through 50")
+    trials = [benchmark(store, mode, device, prompt, n_tokens, pin_budget_mib,
+                        warmups=warmups if i == 0 else 0) for i in range(repeats)]
+    if any(t["generated_token_ids"] != trials[0]["generated_token_ids"] for t in trials):
+        raise ValueError("Measured trials produced different greedy token IDs")
+
+    def spread(key: str) -> dict:
+        xs = [t[key] for t in trials]
+        mean = statistics.fmean(xs)
+        sd = statistics.stdev(xs)
+        return {"median": round(statistics.median(xs), 6), "min": min(xs),
+                "max": max(xs), "mean": round(mean, 6), "stdev": round(sd, 6),
+                "cv": round(sd / mean, 6) if mean else None, "n": len(xs)}
+
+    return {
+        "schema": "phistream.bench.repeated.v1",
+        "provenance": "MEASURED_ON_THIS_MACHINE_SYNTHETIC_UNTRAINED",
+        "mode": mode, "device": trials[0]["device"], "repeats": repeats,
+        "warmup_passes_unscored_before_first_trial": warmups,
+        "timing_scope": "N_FRESH_ENGINE_GENERATIONS_ONE_PROCESS_WARMUPS_BEFORE_FIRST",
+        "pin_warning": trials[0]["pin_warning"],
+        "summary": {"generated_tokens_per_second_end_to_end":
+                        spread("generated_tokens_per_second_end_to_end"),
+                    "total_seconds": spread("total_seconds"),
+                    "weight_load_seconds": spread("weight_load_seconds")},
+        "trials": trials,
+        "interpretation": "Report trial spread and external GPU activity; synthetic throughput only",
     }
 
 
@@ -92,6 +196,8 @@ def main() -> None:
     bench.add_argument("--pin-mib", type=float, default=0.0)
     bench.add_argument("--warmups", type=int, default=0,
                        help="0-5 fresh-engine unscored warmup passes (default 0 for historical comparability)")
+    bench.add_argument("--repeats", type=int, default=1,
+                       help="1 = historic receipt; 2-50 = new fresh-engine trials with spread (use >=5)")
     parity = sp.add_parser("parity", help="Verify streamed and resident logits on this model")
     parity.add_argument("directory")
     parity.add_argument("--device", choices=["auto", "cpu", "cuda"], default="auto")
@@ -584,7 +690,15 @@ def main() -> None:
         print(json.dumps({"status": "verified", "tensor_count": len(store.entries)}, indent=2))
     elif args.command == "bench":
         prompt = [int(n.strip()) for n in args.prompt.split(",")]
-        print(json.dumps(benchmark(store, args.mode, args.device, prompt, args.tokens, args.pin_mib, args.warmups), indent=2))
+        if args.repeats == 1:
+            receipt = benchmark(store, args.mode, args.device, prompt, args.tokens, args.pin_mib, args.warmups)
+        else:
+            receipt = benchmark_repeated(store, args.mode, args.device, prompt, args.tokens,
+                                         args.pin_mib, args.warmups, args.repeats)
+        if receipt["pin_warning"]:
+            import sys
+            print("WARNING: " + receipt["pin_warning"], file=sys.stderr)
+        print(json.dumps(receipt, indent=2))
     elif args.command == "parity":
         a = PhiStreamEngine(store, mode="stream", device=args.device)
         b = PhiStreamEngine(store, mode="resident", device=args.device)
