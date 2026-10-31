@@ -225,6 +225,10 @@ def main() -> None:
     run.add_argument("--device", choices=["cpu", "cuda"], default="cpu")
     run.add_argument("--max-tensor-mib", type=int, default=512)
     run.add_argument("--head-rows", type=int, default=128)
+    run.add_argument("--capacity-mib", type=float, default=None,
+                     help="Optional memory preflight budget; omitted means no preflight")
+    run.add_argument("--reserve-mib", type=float, default=512.0,
+                     help="Memory policy reserve in MiB when capacity is supplied")
     run.add_argument("--output", help="Write receipt to new local JSON file; refuses overwrite")
     fingerprint = sp.add_parser("fingerprint-checkpoint",
         help="SHA256 all local safetensors shards and config; no uploads")
