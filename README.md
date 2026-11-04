@@ -16,6 +16,15 @@ Start with `phi-model-forge` and
 [the Model Forge guide](docs/PHI_MODEL_FORGE_R01.md). Dataset samples are
 unreviewed fixtures and deliberate training is blocked until each row is approved.
 
+## Φ Model Forge R0.2: local readiness + blinded holdout comparisons
+
+The optional, offline `phi-forge-preflight` gives an honest environment and dataset
+readiness receipt without loading models by default. `phi-forge-review-pack`
+pairs existing base/adapter holdout outputs into locally generated,
+blinded A/B review packs with a **separate, private answer key**.
+Neither CLI trains, evaluates model quality automatically, uploads anything or
+promotes a model. See [R0.2 guide](docs/PHI_MODEL_FORGE_R02.md).
+
 ## Why this exists
 
 Streaming large neural networks layer by layer can make model weights exceed available GPU memory, but it pays a disk/host-to-device transfer penalty at *every* decode step. We want a system that decides when streaming is appropriate, verifies actual outputs, and accounts honestly for time, disk bandwidth and memory. “Better” requires measured comparisons, not marketing.
