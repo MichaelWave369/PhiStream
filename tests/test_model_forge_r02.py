@@ -95,6 +95,16 @@ class ForgeReviewPackTests(unittest.TestCase):
         with self.assertRaisesRegex(ForgeError, "different dataset"):
             build_pack(DEFAULT_DATA, self.base, self.adapter)
 
+    def test_mismatched_model_revision_refused(self):
+        base = json.loads(self.base.read_text())
+        adapted = json.loads(self.adapter.read_text())
+        base["model_revision"] = "commit-111"
+        adapted["model_revision"] = "commit-222"
+        self.base.write_text(json.dumps(base))
+        self.adapter.write_text(json.dumps(adapted))
+        with self.assertRaisesRegex(ForgeError, "different model revisions"):
+            build_pack(DEFAULT_DATA, self.base, self.adapter)
+
     def test_duplicate_json_keys_refused(self):
         self.base.write_text('{"a":1,"a":2}')
         with self.assertRaisesRegex(ForgeError, "Duplicate"):
