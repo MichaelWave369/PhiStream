@@ -12,13 +12,9 @@ from pathlib import Path
 
 from phistream.model_forge import DEFAULT_DATA, ForgeError, load_examples, review
 from phistream.forge_token_audit import audit_examples, require_valid
+from phistream.forge_protocol import SYSTEM
 
-SYSTEM = (
-    "You are a PhiOS research operator advisor. Distinguish observations, hypotheses "
-    "and verified results. Never claim to have run tools without evidence. "
-    "Capability is not execution authority; seek explicit approval for side effects. "
-    "Use retrieval for live repository facts and keep local privacy boundaries."
-)
+
 
 
 def train(args: argparse.Namespace) -> dict:

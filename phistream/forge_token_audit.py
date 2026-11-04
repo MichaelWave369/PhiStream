@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 from .model_forge import DEFAULT_DATA, ForgeError, load_examples
+from .forge_protocol import SYSTEM
 
 SCHEMA = "phi.model-forge.token-budget.v1"
 DEFAULT_MODEL = "Qwen/Qwen3-4B-Instruct-2507"
@@ -112,8 +113,6 @@ def inspect(
         model, revision=revision, trust_remote_code=False,
         local_files_only=not allow_download,
     )
-    # Use the exact shared system prompt used by the training script.
-    from scripts.phi_model_train import SYSTEM
     report = audit_examples(examples, tokenizer, SYSTEM, max_length)
     report.update({
         "dataset_sha256": digest,

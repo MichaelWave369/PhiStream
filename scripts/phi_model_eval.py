@@ -10,7 +10,7 @@ import json
 from pathlib import Path
 
 from phistream.model_forge import DEFAULT_DATA, ForgeError, load_examples
-from scripts.phi_model_train import SYSTEM
+from phistream.forge_protocol import SYSTEM
 
 
 def evaluate(args: argparse.Namespace) -> dict:
