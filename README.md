@@ -43,6 +43,17 @@ adds an explicit `-Stage audit-tokens`. Training also runs the same
 fail-closed audit before loading base weights. No trained model is included.
 [Model Forge R0.4 guide](docs/PHI_MODEL_FORGE_R04.md).
 
+## Φ Model Forge R0.5: operator-machine evidence
+
+After running the Windows pilot on **your physical machine**, run
+`python -m phistream.forge_field` or `-Stage field-report` to receive a
+minimal report showing which stage is complete and which one still needs
+operator action. Reports include dataset and adapter hashes, but **never**
+copy prompts, completions, usernames or private file paths. Adapter evaluation
+must now match the recorded training weight SHA-256, dataset, base model and
+revision **before** model loading. A green CI test is not a trained model.
+[Model Forge R0.5 guide](docs/PHI_MODEL_FORGE_R05.md).
+
 ## Why this exists
 
 Streaming large neural networks layer by layer can make model weights exceed available GPU memory, but it pays a disk/host-to-device transfer penalty at *every* decode step. We want a system that decides when streaming is appropriate, verifies actual outputs, and accounts honestly for time, disk bandwidth and memory. “Better” requires measured comparisons, not marketing.
