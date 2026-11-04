@@ -31,7 +31,7 @@ if ($Stage -eq 'train' -and -not $ApproveTraining) {
 if ($AllowModelDownload -and $Stage -notin @('audit-tokens','train','eval-base','eval-adapter')) {
     throw 'Model download permission applies only to an explicit model-run stage.'
 }
-if ($Stage -notin @('check','cuda','curate') -and -not (Test-Path -LiteralPath $Dataset -PathType Leaf)) {
+if ($Stage -notin @('check','cuda','curate','field-report') -and -not (Test-Path -LiteralPath $Dataset -PathType Leaf)) {
     throw "Curated dataset missing: $Dataset. Run -Stage curate first."
 }
 $ArgsList = @()
