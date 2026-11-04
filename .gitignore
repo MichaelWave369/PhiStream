@@ -17,3 +17,5 @@ model_forge/checkpoints/
 *.safetensors
 adapter_model.bin
 phi-training-receipt.json
+
+.venv-forge/

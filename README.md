@@ -25,6 +25,14 @@ blinded A/B review packs with a **separate, private answer key**.
 Neither CLI trains, evaluates model quality automatically, uploads anything or
 promotes a model. See [R0.2 guide](docs/PHI_MODEL_FORGE_R02.md).
 
+## Φ Model Forge R0.3: staged Windows pilot and human-approved data
+
+The optional `phi-forge-curate` command requires an operator to review each
+example individually and writes a new private dataset. The Windows script
+`scripts/phi_forge_windows_pilot.ps1` runs separate, opt-in preflight,
+curation, training and holdout stages; its default is read-only.
+See [R0.3 field guide](docs/PHI_MODEL_FORGE_R03.md). No trained model is included.
+
 ## Why this exists
 
 Streaming large neural networks layer by layer can make model weights exceed available GPU memory, but it pays a disk/host-to-device transfer penalty at *every* decode step. We want a system that decides when streaming is appropriate, verifies actual outputs, and accounts honestly for time, disk bandwidth and memory. “Better” requires measured comparisons, not marketing.

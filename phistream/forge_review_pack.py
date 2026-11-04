@@ -88,6 +88,8 @@ def build_pack(
     _check_receipt(adapted, "adapter", held_out, digest)
     if base["model"] != adapted["model"]:
         raise ForgeError("Base and adapter receipts refer to different models")
+    if base.get("model_revision") != adapted.get("model_revision"):
+        raise ForgeError("Base and adapter receipts use different model revisions")
     base_rows = {x["id"]: x["output"] for x in base["outputs"]}
     adapt_rows = {x["id"]: x["output"] for x in adapted["outputs"]}
     session = identity()

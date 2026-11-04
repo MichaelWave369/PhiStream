@@ -53,13 +53,13 @@ def train(args: argparse.Namespace) -> dict:
         bnb_4bit_use_double_quant=True, bnb_4bit_compute_dtype=dtype,
     )
     tokenizer = AutoTokenizer.from_pretrained(
-        args.model, trust_remote_code=False, local_files_only=not args.allow_download)
+        args.model, trust_remote_code=False, local_files_only=not args.allow_download, revision=args.revision)
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
     model = AutoModelForCausalLM.from_pretrained(
         args.model, quantization_config=quant, device_map="auto",
-        torch_dtype=dtype, trust_remote_code=False,
-        local_files_only=not args.allow_download,
+        dtype=dtype, trust_remote_code=False,
+        local_files_only=not args.allow_download, revision=args.revision,
     )
     model.config.use_cache = False
     model = prepare_model_for_kbit_training(model)
@@ -101,10 +101,20 @@ def train(args: argparse.Namespace) -> dict:
     result = trainer.train()
     trainer.model.save_pretrained(str(output))
     tokenizer.save_pretrained(str(output))
+    weights = output / "adapter_model.safetensors"
+    if not weights.is_file():
+        raise ForgeError("No adapter_model.safetensors was saved; training output requires inspection")
+    hasher = hashlib.sha256()
+    with weights.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            hasher.update(chunk)
+    weights_sha256 = hasher.hexdigest()
     receipt = {
         "schema": "phi.model-forge.training-receipt.v1",
         "status": "LOCALLY_TRAINED_UNVERIFIED_QUALITY",
         "base_model": args.model,
+        "model_revision": args.revision,
+        "adapter_sha256": weights_sha256,
         "adapter_path": str(output),
         "dataset_sha256": digest,
         "train_example_count": len(training_rows),
@@ -136,6 +146,7 @@ def main() -> None:
     p.add_argument("--steps", type=int, default=16)
     p.add_argument("--max-length", type=int, default=512)
     p.add_argument("--seed", type=int, default=369)
+    p.add_argument("--revision", default=None, help="Optional pinned model revision; prefer an immutable Hugging Face commit SHA")
     p.add_argument("--execute", action="store_true")
     p.add_argument("--allow-download", action="store_true",
                    help="Allow explicit Hugging Face base model download; otherwise use cache")

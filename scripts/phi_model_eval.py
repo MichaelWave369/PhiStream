@@ -37,11 +37,11 @@ def evaluate(args: argparse.Namespace) -> dict:
         bnb_4bit_use_double_quant=True, bnb_4bit_compute_dtype=dtype,
     )
     tokenizer = AutoTokenizer.from_pretrained(
-        args.model, local_files_only=not args.allow_download, trust_remote_code=False)
+        args.model, local_files_only=not args.allow_download, trust_remote_code=False, revision=args.revision)
     model = AutoModelForCausalLM.from_pretrained(
         args.model, quantization_config=quant, device_map="auto",
-        torch_dtype=dtype, trust_remote_code=False,
-        local_files_only=not args.allow_download)
+        dtype=dtype, trust_remote_code=False,
+        local_files_only=not args.allow_download, revision=args.revision)
     if args.mode == "adapter":
         from peft import PeftModel
         model = PeftModel.from_pretrained(
@@ -66,7 +66,7 @@ def evaluate(args: argparse.Namespace) -> dict:
                         "output": completion})
     receipt = {
         "schema": "phi.model-forge.holdout-output.v1",
-        "model": args.model, "mode": args.mode,
+        "model": args.model, "model_revision": args.revision, "mode": args.mode,
         "dataset_sha256": digest, "outputs": outputs,
         "review_status": "HUMAN_REVIEW_REQUIRED",
         "quality_proven": False, "deployment_authorized": False,
@@ -85,6 +85,7 @@ def main() -> None:
     p.add_argument("--dataset", type=Path, default=DEFAULT_DATA)
     p.add_argument("--output", type=Path, required=True)
     p.add_argument("--max-new-tokens", type=int, default=128)
+    p.add_argument("--revision", default=None, help="Optional pinned model revision")
     p.add_argument("--allow-download", action="store_true")
     args = p.parse_args()
     try:
