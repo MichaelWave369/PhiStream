@@ -14,6 +14,8 @@ authors = [{name = "MichaelWave369"}]
 [project.scripts]
 phistream = "phistream.cli:main"
 phi-model-forge = "phistream.model_forge:main"
+phi-forge-preflight = "phistream.forge_preflight:main"
+phi-forge-review-pack = "phistream.forge_review_pack:main"
 
 [tool.setuptools.packages.find]
 include = ["phistream*"]
