@@ -33,6 +33,16 @@ example individually and writes a new private dataset. The Windows script
 curation, training and holdout stages; its default is read-only.
 See [R0.3 field guide](docs/PHI_MODEL_FORGE_R03.md). No trained model is included.
 
+## Φ Model Forge R0.4: tokenizer budget gate before QLoRA
+
+`phi-forge-token-audit` checks reviewed training examples with the actual
+locally selected tokenizer, before GPU model loading. It blocks examples
+that overflow the configured sequence budget, lose the supervised assistant
+target, or have incompatible chat-template prefix tokens. The Windows pilot
+adds an explicit `-Stage audit-tokens`. Training also runs the same
+fail-closed audit before loading base weights. No trained model is included.
+[Model Forge R0.4 guide](docs/PHI_MODEL_FORGE_R04.md).
+
 ## Why this exists
 
 Streaming large neural networks layer by layer can make model weights exceed available GPU memory, but it pays a disk/host-to-device transfer penalty at *every* decode step. We want a system that decides when streaming is appropriate, verifies actual outputs, and accounts honestly for time, disk bandwidth and memory. “Better” requires measured comparisons, not marketing.

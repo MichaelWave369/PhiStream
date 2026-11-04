@@ -11,13 +11,10 @@ import json
 from pathlib import Path
 
 from phistream.model_forge import DEFAULT_DATA, ForgeError, load_examples, review
+from phistream.forge_token_audit import audit_examples, require_valid
+from phistream.forge_protocol import SYSTEM
 
-SYSTEM = (
-    "You are a PhiOS research operator advisor. Distinguish observations, hypotheses "
-    "and verified results. Never claim to have run tools without evidence. "
-    "Capability is not execution authority; seek explicit approval for side effects. "
-    "Use retrieval for live repository facts and keep local privacy boundaries."
-)
+
 
 
 def train(args: argparse.Namespace) -> dict:
@@ -56,6 +53,9 @@ def train(args: argparse.Namespace) -> dict:
         args.model, trust_remote_code=False, local_files_only=not args.allow_download, revision=args.revision)
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
+    # Check actual token counts BEFORE loading 4B model weights or using GPU memory.
+    token_audit = audit_examples(examples, tokenizer, SYSTEM, args.max_length)
+    require_valid(token_audit)
     model = AutoModelForCausalLM.from_pretrained(
         args.model, quantization_config=quant, device_map="auto",
         dtype=dtype, trust_remote_code=False,
@@ -115,6 +115,9 @@ def train(args: argparse.Namespace) -> dict:
         "base_model": args.model,
         "model_revision": args.revision,
         "adapter_sha256": weights_sha256,
+        "token_budget_audit": token_audit,
+        "base_commit_reported": getattr(model.config, "_commit_hash", None),
+        "tokenizer_commit_reported": getattr(tokenizer, "init_kwargs", {}).get("_commit_hash"),
         "adapter_path": str(output),
         "dataset_sha256": digest,
         "train_example_count": len(training_rows),

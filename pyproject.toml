@@ -17,6 +17,7 @@ phi-model-forge = "phistream.model_forge:main"
 phi-forge-preflight = "phistream.forge_preflight:main"
 phi-forge-review-pack = "phistream.forge_review_pack:main"
 phi-forge-curate = "phistream.forge_curate:main"
+phi-forge-token-audit = "phistream.forge_token_audit:main"
 
 [tool.setuptools.packages.find]
 include = ["phistream*"]
