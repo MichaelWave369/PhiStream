@@ -33,6 +33,8 @@ def _load_receipt(path: Path) -> dict[str, Any]:
     try:
         obj = json.loads(source.read_text(encoding="utf-8"), object_pairs_hook=unique,
                          parse_constant=lambda _: (_ for _ in ()).throw(ValueError("nonfinite")))
+    except ForgeError:
+        raise
     except (ValueError, UnicodeDecodeError) as exc:
         raise ForgeError("Invalid output receipt JSON") from exc
     if not isinstance(obj, dict):
