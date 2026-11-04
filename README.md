@@ -6,6 +6,16 @@ Developed for the MichaelWave369 ecosystem. Independent from AirLLM; no code, de
 
 **Status:** Experimental CPU synthetic fixture **plus** a narrow, local Llama-family safetensors token-ID inference path. On an operator-controlled RTX 5070, user-declared reference comparisons and 12 balanced paired BATCHED/SINGLE time measurements across three frozen SmolLM2-135M-Instruct prompt cases met the predeclared **further-review-only** gate. An offline SHA-bound audit checked the stored trial receipts. This is **not** authenticated reference provenance, statistical speedup certification, a production chat engine or general compatibility with arbitrary Llama/Qwen/GGUF checkpoints. No 70B/405B claim.
 
+## Φ Model Forge R0.1 (optional fine-tuning lab)
+
+A **separate, opt-in local QLoRA research lane** now provides a reviewed-data contract,
+a 22-example training seed and six held-out prompts, local model loading safeguards,
+and manual base/adapter output comparisons. It does not alter PhiStream's
+inference engine or include any model weights. It is **not yet a trained PhiOS model**.
+Start with `phi-model-forge` and
+[the Model Forge guide](docs/PHI_MODEL_FORGE_R01.md). Dataset samples are
+unreviewed fixtures and deliberate training is blocked until each row is approved.
+
 ## Why this exists
 
 Streaming large neural networks layer by layer can make model weights exceed available GPU memory, but it pays a disk/host-to-device transfer penalty at *every* decode step. We want a system that decides when streaming is appropriate, verifies actual outputs, and accounts honestly for time, disk bandwidth and memory. “Better” requires measured comparisons, not marketing.

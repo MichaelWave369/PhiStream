@@ -13,6 +13,7 @@ authors = [{name = "MichaelWave369"}]
 
 [project.scripts]
 phistream = "phistream.cli:main"
+phi-model-forge = "phistream.model_forge:main"
 
 [tool.setuptools.packages.find]
 include = ["phistream*"]

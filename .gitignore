@@ -9,3 +9,11 @@ dist/
 *.bin
 artifacts/
 benchmarks/local/
+
+# Model Forge output is operator-local, never committed.
+model_forge/outputs/
+model_forge/runs/
+model_forge/checkpoints/
+*.safetensors
+adapter_model.bin
+phi-training-receipt.json
