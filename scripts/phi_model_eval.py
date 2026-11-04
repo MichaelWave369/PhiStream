@@ -11,6 +11,7 @@ from pathlib import Path
 
 from phistream.model_forge import DEFAULT_DATA, ForgeError, load_examples
 from phistream.forge_protocol import SYSTEM
+from phistream.forge_field import verify_local_adapter
 
 
 def evaluate(args: argparse.Namespace) -> dict:
@@ -24,6 +25,16 @@ def evaluate(args: argparse.Namespace) -> dict:
         raise ForgeError("Refusing to overwrite an existing evaluation receipt")
     if args.max_new_tokens < 1 or args.max_new_tokens > 256:
         raise ForgeError("max_new_tokens must be 1..256")
+    # Do this BEFORE loading the base model or using GPU memory.
+    verified_adapter = None
+    if args.mode == "adapter":
+        verified_adapter = verify_local_adapter(
+            args.adapter, digest,
+            sum(x["split"] == "train" for x in examples), len(held_out),
+            base_model=args.model, model_revision=args.revision,
+        )
+        if verified_adapter["model_revision_declared"] != args.revision:
+            raise ForgeError("Eval revision must exactly match trained adapter's revision")
     try:
         import torch
         from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
@@ -68,6 +79,7 @@ def evaluate(args: argparse.Namespace) -> dict:
         "schema": "phi.model-forge.holdout-output.v1",
         "model": args.model, "model_revision": args.revision, "mode": args.mode,
         "dataset_sha256": digest, "outputs": outputs,
+        "adapter_sha256": verified_adapter["adapter_sha256"] if verified_adapter else None,
         "review_status": "HUMAN_REVIEW_REQUIRED",
         "quality_proven": False, "deployment_authorized": False,
         "network_upload": False,

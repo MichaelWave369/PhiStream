@@ -1,7 +1,7 @@
 # Φ Model Forge R0.3. Windows local stages; check (read-only) by default.
 [CmdletBinding()]
 param(
-    [ValidateSet('check','cuda','curate','audit-tokens','train','eval-base','eval-adapter','blind-review')]
+    [ValidateSet('check','cuda','curate','audit-tokens','train','eval-base','eval-adapter','blind-review','field-report')]
     [string]$Stage = 'check',
     [string]$Python = 'python',
     [string]$Dataset = '',
@@ -67,6 +67,10 @@ switch ($Stage) {
         }
         $ArgsList = @('-m','scripts.phi_model_eval','--mode','adapter',
             '--model',$Model,'--adapter',$Adapter,'--dataset',$Dataset,'--output',$AdapterReceipt)
+    }
+    'field-report' {
+        # Data can be absent; report the missing step without reading any prompts into stdout.
+        $ArgsList = @('-m','phistream.forge_field','--dataset',$Dataset,'--root',$OutputRoot)
     }
     'blind-review' {
         foreach ($Needed in @($BaseReceipt,$AdapterReceipt)) {
