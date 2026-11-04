@@ -7,6 +7,7 @@ param(
     [string]$Dataset = '',
     [string]$OutputRoot = '',
     [string]$Model = 'Qwen/Qwen3-4B-Instruct-2507',
+    [string]$Revision = '',
     [ValidateRange(1,300)][int]$Steps = 8,
     [ValidateRange(128,1024)][int]$MaxLength = 256,
     [switch]$ApproveTraining,
@@ -73,6 +74,7 @@ switch ($Stage) {
             '--base',$BaseReceipt,'--adapter',$AdapterReceipt,'--pack',$BlindPack,'--key',$BlindKey)
     }
 }
+if ($Revision -and $Stage -in @('train','eval-base','eval-adapter')) { $ArgsList += @('--revision',$Revision) }
 if ($AllowModelDownload) { $ArgsList += '--allow-download' }
 Write-Host "Model Forge local stage: $Stage"
 Write-Host 'Stages are independent. No automatic model training or publishing.'
