@@ -141,6 +141,7 @@ class ForgeFieldTests(unittest.TestCase):
         self.assertIn("'field-report'", script)
         self.assertIn("phistream.forge_field", script)
         self.assertIn("'--root',$OutputRoot", script)
+        self.assertIn("$Stage -notin @('check','cuda','curate','field-report')", script)
 
 
 if __name__ == "__main__":
