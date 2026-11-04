@@ -1,7 +1,7 @@
 # Φ Model Forge R0.3. Windows local stages; check (read-only) by default.
 [CmdletBinding()]
 param(
-    [ValidateSet('check','cuda','curate','train','eval-base','eval-adapter','blind-review')]
+    [ValidateSet('check','cuda','curate','audit-tokens','train','eval-base','eval-adapter','blind-review')]
     [string]$Stage = 'check',
     [string]$Python = 'python',
     [string]$Dataset = '',
@@ -28,7 +28,7 @@ $BlindKey = Join-Path $OutputRoot 'blind-review-key-r03.json'
 if ($Stage -eq 'train' -and -not $ApproveTraining) {
     throw 'Training requires -ApproveTraining, not merely a reviewed dataset.'
 }
-if ($AllowModelDownload -and $Stage -notin @('train','eval-base','eval-adapter')) {
+if ($AllowModelDownload -and $Stage -notin @('audit-tokens','train','eval-base','eval-adapter')) {
     throw 'Model download permission applies only to an explicit model-run stage.'
 }
 if ($Stage -notin @('check','cuda','curate') -and -not (Test-Path -LiteralPath $Dataset -PathType Leaf)) {
@@ -46,6 +46,10 @@ switch ($Stage) {
     }
     'curate' {
         $ArgsList = @('-m','phistream.forge_curate','--dataset',$Seed,'--output',$Dataset)
+    }
+    'audit-tokens' {
+        $ArgsList = @('-m','phistream.forge_token_audit','--dataset',$Dataset,
+            '--model',$Model,'--max-length',"$MaxLength")
     }
     'train' {
         $ArgsList = @('-m','scripts.phi_model_train','--dataset',$Dataset,
@@ -74,7 +78,7 @@ switch ($Stage) {
             '--base',$BaseReceipt,'--adapter',$AdapterReceipt,'--pack',$BlindPack,'--key',$BlindKey)
     }
 }
-if ($Revision -and $Stage -in @('train','eval-base','eval-adapter')) { $ArgsList += @('--revision',$Revision) }
+if ($Revision -and $Stage -in @('audit-tokens','train','eval-base','eval-adapter')) { $ArgsList += @('--revision',$Revision) }
 if ($AllowModelDownload) { $ArgsList += '--allow-download' }
 Write-Host "Model Forge local stage: $Stage"
 Write-Host 'Stages are independent. No automatic model training or publishing.'
