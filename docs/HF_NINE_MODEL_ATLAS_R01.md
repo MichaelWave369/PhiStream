@@ -67,3 +67,22 @@ All valid proposed mixes return HELD_UNVERIFIED_REVIEW_ONLY. The tool **does not
 - [Hugging Face PEFT](https://huggingface.co/docs/transformers/peft), [merging](https://huggingface.co/docs/peft/main/developer_guides/model_merging), [model_info API](https://huggingface.co/docs/huggingface_hub/package_reference/hf_api), [download dry run](https://huggingface.co/docs/huggingface_hub/main/guides/download), and [model card guidance](https://huggingface.co/docs/hub/model-cards)
 
 **Ledger above ego:** metadata, green unit tests, trained adapters, verified quality, runtime qualification, and execution authority are six different states.
+
+
+## Reuse ΦPocketRotor before inventing another MoE router
+
+The repository already contains a separate **ΦPocketRotor** research line. This is important because there are **three different routing layers**, which must not be conflated:
+
+- **Vessie GA108**: task-level specialist perspectives and approval-bound cognitive orchestration. One canonical governed task route remains in SuperPhiVessel.
+- **PhiStream Model Atlas / Model Forge**: proposed model selection, text-specialist LoRA switching, held-out evaluation and eventual compatible-adapter fusion, subject to real artifact verification and operator approval.
+- **ΦPocketRotor**: **read-only observation of a MoE model's own token-level native expert gate**, not a policy router and not a replacement for training LoRA adapters.
+
+Existing source-backed evidence and gates:
+
+- [PocketRotor E3](POCKETROTOR_E3_QWEN35.md) hooks an already-loaded Hugging Face Qwen3.5 MoE router and observes native selected expert IDs (256 routed experts, top-8); it does not load or modify the model.
+- [PocketRotor E4](POCKETROTOR_E4_NATIVE_CPU.md) exercises the actual Hugging Face Transformers MoE classes with **tiny synthetic CPU weights**. It cannot demonstrate genuine pretrained checkpoint behavior or RTX performance.
+- [PocketRotor E5](POCKETROTOR_E5_PRETRAINED.md) specifies an **explicit manual-only** pretrained IBM Granite MoE test, using a pinned `ibm-granite/granite-3.0-1b-a400m-instruct` checkpoint and its separately checked sha256. The manual workflow is NOT triggered by pushes/PRs/merges. Unless actual run receipts are present, its completion and outputs remain unverified.
+
+These complementary layers suggest a better long-term design: the Atlas proposes *which methods and model artifacts to test*; Vessie authorizes the *task and allowed provider*; native MoE routing remains the trained model's **own internal computational mechanism**. No naming of historical profiles as MoE expert IDs, and no user-defined adapter mixture should be mislabeled as native per-token gating.
+
+The first optional real pretrained routing experiment can use E5's smaller Granite checkpoint, but it is **separate from** the Qwen3-4B Forge QLoRA pilot and must remain individually operator-approved. Neither experiment proves a Nine Mind improvement without held-out outcomes.
