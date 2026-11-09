@@ -1,0 +1,95 @@
+{
+  "schema": "phistream.model-atlas.catalog.v0.1",
+  "reviewed_on": "2026-11-09",
+  "status": "CANDIDATES_ONLY",
+  "intended_host": "PhiStream research (not a model server, deployment, or Vessie router)",
+  "models": [
+    {
+      "id": "Qwen/Qwen3-4B-Instruct-2507",
+      "family": "qwen3",
+      "modality": "text",
+      "license": "apache-2.0",
+      "lane": "EXISTING_FORGE_PILOT",
+      "revision": null,
+      "local_qualification": "UNVERIFIED",
+      "url": "https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507"
+    },
+    {
+      "id": "Qwen/Qwen3.5-4B",
+      "family": "qwen3_5",
+      "modality": "image-text",
+      "license": "apache-2.0",
+      "lane": "ARCHITECTURE_REVIEW_REQUIRED",
+      "revision": null,
+      "local_qualification": "UNVERIFIED",
+      "url": "https://huggingface.co/Qwen/Qwen3.5-4B"
+    },
+    {
+      "id": "Qwen/Qwen3.5-9B",
+      "family": "qwen3_5",
+      "modality": "image-text",
+      "license": "apache-2.0",
+      "lane": "ARCHITECTURE_REVIEW_REQUIRED",
+      "revision": null,
+      "local_qualification": "UNVERIFIED",
+      "url": "https://huggingface.co/Qwen/Qwen3.5-9B"
+    },
+    {
+      "id": "microsoft/Phi-4-mini-instruct",
+      "family": "phi3",
+      "modality": "text",
+      "license": "mit",
+      "lane": "ARCHITECTURE_REVIEW_REQUIRED",
+      "revision": null,
+      "local_qualification": "UNVERIFIED",
+      "url": "https://huggingface.co/microsoft/Phi-4-mini-instruct"
+    }
+  ],
+  "profiles": [
+    {
+      "id": "tesla",
+      "council": "invention",
+      "focus": "electrical systems, invention, hypothesis generation"
+    },
+    {
+      "id": "da-vinci",
+      "council": "invention",
+      "focus": "mechanics, cross-domain sketching, iterative design"
+    },
+    {
+      "id": "feynman",
+      "council": "invention",
+      "focus": "physics, explanation, falsifiable testing"
+    },
+    {
+      "id": "escher",
+      "council": "art",
+      "focus": "geometry, spatial relations, recursion"
+    },
+    {
+      "id": "dali",
+      "council": "art",
+      "focus": "surreal imagery, symbolic associations"
+    },
+    {
+      "id": "picasso",
+      "council": "art",
+      "focus": "multiple perspectives, visual deconstruction"
+    },
+    {
+      "id": "bach",
+      "council": "music",
+      "focus": "counterpoint, musical structure"
+    },
+    {
+      "id": "beethoven",
+      "council": "music",
+      "focus": "motivic development, expressive form"
+    },
+    {
+      "id": "vivaldi",
+      "council": "music",
+      "focus": "rhythmic momentum, concertante contrast"
+    }
+  ]
+}
