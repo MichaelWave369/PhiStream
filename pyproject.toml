@@ -20,6 +20,7 @@ phi-forge-curate = "phistream.forge_curate:main"
 phi-forge-token-audit = "phistream.forge_token_audit:main"
 phi-forge-field-report = "phistream.forge_field:main"
 phi-weight-surgery = "phistream.weight_surgery:main"
+phi-clavis = "phistream.clavis:main"
 
 [tool.setuptools.packages.find]
 include = ["phistream*"]
