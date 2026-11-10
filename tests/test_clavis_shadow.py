@@ -38,7 +38,9 @@ def r03(profile="tesla"):
         "schema": "phistream.clavis.qualification-review.v0.3",
         "status": "SCREENED_FOR_FURTHER_INDEPENDENT_REVIEW_ONLY",
         "profile_id": profile,
+        "arm_count": 2,
         "heldout_rows": 24,
+        "minimum_screening_rows": 24,
         "dataset_sha256_verified_locally": True,
         "source_receipt_digests_verified_locally": True,
         "blind_answers_matched_to_receipts": True,
@@ -54,6 +56,13 @@ def r03(profile="tesla"):
         "private_prompts_answers_or_mappings_exported": False,
         "analysis": {
             "source": "OPERATOR_SUPPLIED_UNATTESTED_MANUAL_SCORES",
+            "prompted_minus_base_mean_unverified": 0.3,
+            "prompted_minus_base_median_unverified": 0.5,
+            "paired_outcomes": {"prompted_higher": 12, "base_higher": 8, "tie": 4},
+            "exploratory_exact_two_sided_sign_p": 0.5,
+            "null_assumption_verified": False,
+            "independence_verified": False,
+            "multiplicity_adjusted": False,
             "statistically_qualified": False,
             "quality_claim": "NONE",
         },
@@ -153,17 +162,12 @@ class ClavisShadowTests(unittest.TestCase):
             lambda r: r.update(profile_id="bach"),
             lambda r: r.update(source_receipt_digests_verified_locally=False),
         ]
-        # Unknown field on report is untrusted but ignored. Only flags consumed
-        # for review scope must be conservative.
         for i, mutate in enumerate(cases):
-            if i == 5 or i == 6 or i == 7 or i == 8 or i in (0,1,2,3):
-                with self.subTest(i=i):
-                    value = copy.deepcopy(r03())
-                    mutate(value)
-                    if i == 5:
-                        pass
-                    with self.assertRaises(ClavisError):
-                        shadow_compare(data, [value])
+            with self.subTest(i=i):
+                value = copy.deepcopy(r03())
+                mutate(value)
+                with self.assertRaises(ClavisError):
+                    shadow_compare(data, [value])
         with self.assertRaisesRegex(ClavisError, "duplicate R0.3"):
             shadow_compare(data, [r03(), r03()])
         with self.assertRaises(ClavisError):
