@@ -545,3 +545,7 @@ before loading weights on any mismatch. This is a stronger
 byte-integrity check, **not** a claim that the pretrained pilot has
 already run. The ~2.67 GB real-checkpoint download remains explicit,
 manual-only, and wholly absent from PR tests.
+
+## Φ Nine Mind R0.6 · Cache-Only Specialist Prompt Evaluation
+
+The [Nine Mind prompted runner](docs/NINE_MIND_PROMPT_RUNNER_R06.md) fills the middle arm of the existing [blind comparison](docs/NINE_MIND_BLIND_BENCH_R05.md): unchanged base, same base with a reviewed method prompt, and eventually a genuinely trained adapter. Its default command is an **offline preflight only**. Actual local 4-bit Qwen3 inference requires a fully human-reviewed private Forge dataset, two explicit approval switches, the exact cached model revision, and a new private output path outside Git. It neither downloads model weights nor changes Vessie/GA108 routing or trains adapters. No physical model run is claimed by CI.
