@@ -23,6 +23,7 @@ phi-weight-surgery = "phistream.weight_surgery:main"
 phi-clavis = "phistream.clavis:main"
 phi-clavis-review = "phistream.clavis_evidence:main"
 phi-clavis-qualify = "phistream.clavis_qualification:main"
+phi-clavis-shadow = "phistream.clavis_shadow:main"
 
 [tool.setuptools.packages.find]
 include = ["phistream*"]
