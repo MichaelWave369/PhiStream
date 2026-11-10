@@ -79,8 +79,24 @@ def _validate_manifest(manifest: dict) -> tuple[str, list[dict]]:
 
 def _validate_qualification(report: dict, reference_profiles: set[str]) -> str:
     """R0.3 report is an *untrusted metadata declaration*, never authorization."""
-    if type(report) is not dict or report.get("schema") != QUAL_SCHEMA:
+    _required(report, {
+        "schema", "status", "profile_id", "arm_count", "heldout_rows",
+        "minimum_screening_rows", "dataset_sha256_verified_locally",
+        "source_receipt_digests_verified_locally",
+        "blind_answers_matched_to_receipts",
+        "model_and_recipe_declarations_consistent",
+        "dataset_independence_attested", "human_grading_attested",
+        "model_execution_attested", "checkpoint_bytes_attested",
+        "latency_or_cost_measured", "quality_proven", "routing_activated",
+        "deployment_authorized", "private_prompts_answers_or_mappings_exported",
+        "analysis",
+    }, "R0.3 qualification")
+    if report["schema"] != QUAL_SCHEMA:
         _reject("unsupported R0.3 qualification report")
+    if type(report["arm_count"]) is not int or report["arm_count"] not in (2, 3):
+        _reject("invalid R0.3 arm count")
+    if type(report["minimum_screening_rows"]) is not int or report["minimum_screening_rows"] != 24:
+        _reject("R0.3 screening threshold drift")
     profile = report.get("profile_id")
     if type(profile) is not str or profile not in reference_profiles:
         _reject("R0.3 profile is outside the reference scope")
@@ -106,11 +122,27 @@ def _validate_qualification(report: dict, reference_profiles: set[str]) -> str:
     if any(report.get(field) is not False for field in must_be_false):
         _reject("R0.3 report makes unsupported attestation or authorization claim")
     analysis = report.get("analysis")
-    if (type(analysis) is not dict or
-        analysis.get("source") != "OPERATOR_SUPPLIED_UNATTESTED_MANUAL_SCORES" or
-        analysis.get("statistically_qualified") is not False or
-        analysis.get("quality_claim") != "NONE"):
+    _required(analysis, {
+        "source", "prompted_minus_base_mean_unverified",
+        "prompted_minus_base_median_unverified", "paired_outcomes",
+        "exploratory_exact_two_sided_sign_p", "null_assumption_verified",
+        "independence_verified", "multiplicity_adjusted",
+        "statistically_qualified", "quality_claim",
+    }, "R0.3 analysis")
+    if (analysis["source"] != "OPERATOR_SUPPLIED_UNATTESTED_MANUAL_SCORES" or
+        analysis["null_assumption_verified"] is not False or
+        analysis["independence_verified"] is not False or
+        analysis["multiplicity_adjusted"] is not False or
+        analysis["statistically_qualified"] is not False or
+        analysis["quality_claim"] != "NONE"):
         _reject("R0.3 statistical evidence status is incompatible")
+    _required(analysis["paired_outcomes"], {
+        "prompted_higher", "base_higher", "tie",
+    }, "R0.3 paired outcomes")
+    outcomes = analysis["paired_outcomes"]
+    if (any(type(v) is not int or v < 0 for v in outcomes.values()) or
+        sum(outcomes.values()) != report["heldout_rows"]):
+        _reject("R0.3 paired counts are inconsistent with heldout rows")
     return profile
 
 
