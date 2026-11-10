@@ -60,6 +60,8 @@ def _check_original_jsonl(path: Path) -> None:
         try:
             json.loads(line, object_pairs_hook=_unique,
                        parse_constant=lambda _: _deny("nonfinite dataset JSON"))
+        except ClavisError:
+            raise  # Keep specific duplicate-key/nonfinite denial intact.
         except (ValueError, TypeError) as exc:
             _deny("invalid private study dataset JSON")
 
@@ -71,7 +73,7 @@ def preflight(dataset: Path, protocol: dict, *, max_new_tokens: int = 128) -> di
         "case_families", "reviewer_separation_declared",
         "holdout_frozen_before_generation_declared",
     } or protocol["schema"] != SCHEMA:
-        _deny("unsupported R0.6 study protocol")
+        _deny("unsupported R0.6 study protocol schema")
     source_class, profile = protocol["source_class"], protocol["profile_id"]
     if type(source_class) is not str or source_class not in SOURCES:
         _deny("invalid study source class")
