@@ -27,6 +27,8 @@ jobs:
         run: python -m unittest discover -s tests -v
       - name: CLAVIS R0.4 shadow CLI (offline, no model execution)
         run: python -m phistream.clavis_shadow --help
+      - name: CLAVIS R0.5 adaptive shadow CLI (calibration-only, no model)
+        run: python -m phistream.clavis_adaptive --help
       - name: Verify checkpoint inspection CLI help (offline)
         run: |
           python -m phistream.cli inspect-checkpoint --help
