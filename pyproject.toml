@@ -25,6 +25,7 @@ phi-clavis-review = "phistream.clavis_evidence:main"
 phi-clavis-qualify = "phistream.clavis_qualification:main"
 phi-clavis-shadow = "phistream.clavis_shadow:main"
 phi-clavis-adaptive = "phistream.clavis_adaptive:main"
+phi-clavis-pilot = "phistream.clavis_pilot:main"
 
 [tool.setuptools.packages.find]
 include = ["phistream*"]
