@@ -88,7 +88,11 @@ def build_pack(dataset_path: Path, profile: str, base_path: Path, prompted_path:
         _check_receipt(receipt, mode, heldout, dataset_digest)
         _check_adapter_provenance(receipt, mode)
     _validate_prompted(prompted, heldout, dataset_digest, profile)
-    models = {(r["model"], r.get("model_revision")) for r in arm_inputs.values()}
+    for receipt in arm_inputs.values():
+        revision = receipt.get("model_revision")
+        if not isinstance(revision, str) or not _REVISIONS.fullmatch(revision):
+            raise ForgeError("all arm receipts require an exact pinned 40-character model revision")
+    models = {(r["model"], r["model_revision"]) for r in arm_inputs.values()}
     if len(models) != 1:
         raise ForgeError("all arms must declare exactly the same base model and revision")
     model, revision = next(iter(models))
