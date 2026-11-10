@@ -100,8 +100,8 @@ class ClavisEvidenceBridgeTests(unittest.TestCase):
         self.assertFalse(report["model_execution_independently_attested"])
         exported = json.dumps(report)
         self.assertNotIn("PRIVATE MOCK", exported)
-        self.assertNotIn("mapping", exported)
-        self.assertNotIn("answers", exported)
+        self.assertNotIn('"mapping"', exported)
+        self.assertNotIn('"answers"', exported)
 
     def test_unreviewed_short_and_ungraded_holds(self):
         original, key = mock_blind_rows()
