@@ -1,0 +1,14 @@
+{
+  "schema": "phistream.forge-baseline-pin.v0.3",
+  "model_id": "Qwen/Qwen3-4B-Instruct-2507",
+  "revision": "cdbee75f17c01a7cc42f958dc650907174af0554",
+  "reported_license": "apache-2.0",
+  "expected_architecture": "Qwen3ForCausalLM",
+  "observed_on": "2026-11-09",
+  "source": "https://huggingface.co/api/models/Qwen/Qwen3-4B-Instruct-2507",
+  "source_class": "PUBLIC_HF_API_METADATA_NOT_CHECKPOINT_VERIFICATION",
+  "source_reported_not_independently_attested": true,
+  "model_weights_downloaded": false,
+  "local_cuda_fit_verified": false,
+  "training_approved": false
+}
