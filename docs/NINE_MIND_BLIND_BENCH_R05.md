@@ -50,7 +50,7 @@ Then call:
 
 ```powershell
 python -m phistream.nine_mind_bench `
-  --dataset "C:\Private\reviewed-texas.jsonl" `
+  --dataset "C:\Private\reviewed-tesla.jsonl" `
   --profile tesla `
   --base "C:\Private\baseline.json" `
   --prompted "C:\Private\method-prompted.json" `
