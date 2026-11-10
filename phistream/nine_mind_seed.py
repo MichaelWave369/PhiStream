@@ -69,6 +69,10 @@ def _load_seed(path: Path):
         try:
             row = json.loads(line, object_pairs_hook=_unique_json,
                              parse_constant=lambda _: (_ for _ in ()).throw(SeedError("nonfinite JSON")))
+        except SeedError:
+            # Preserve the precise fail-closed reason from duplicate-key and
+            # nonfinite JSON checks instead of hiding it as a generic row error.
+            raise
         except (ValueError, TypeError) as exc:
             raise SeedError(f"invalid row {i}") from exc
         if not isinstance(row, dict) or set(row) != RECORD_KEYS or row["schema"] != SCHEMA:
