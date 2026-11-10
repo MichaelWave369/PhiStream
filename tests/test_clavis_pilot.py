@@ -148,7 +148,7 @@ class ClavisPilotTests(unittest.TestCase):
             ({"approved": False}, "HELD_UNREVIEWED_SOURCE_EXAMPLES"),
             ({"source": "SYNTHETIC_FIXTURE"}, "SYNTHETIC_MECHANICS_ONLY"),
             ({"count": 20}, "HELD_INSUFFICIENT_INDEPENDENT_FAMILY_COVERAGE"),
-            ({"groups": 6}, "HELD_INSUFFICIENT_INDEPENDENT_FAMILY_COVERAGE"),
+            ({"groups": 7}, "HELD_INSUFFICIENT_INDEPENDENT_FAMILY_COVERAGE"),
         ]:
             with self.subTest(expected=expected):
                 manifest, _ = create_fake_study(self.path, **opts)
