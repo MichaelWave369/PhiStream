@@ -106,6 +106,13 @@ class NineMindBenchTests(unittest.TestCase):
         with self.assertRaisesRegex(ForgeError, "exact pinned"):
             self.build()
 
+    def test_malformed_revision_type_is_a_clean_refusal(self):
+        receipt = run_receipt(self.dataset, "prompted")
+        receipt["model_revision"] = ["invalid", "list"]
+        self.prompted.write_text(json.dumps(receipt), encoding="utf-8")
+        with self.assertRaisesRegex(ForgeError, "exact pinned"):
+            self.build()
+
     def test_bad_recipe_or_false_method_application_denied(self):
         for key, value, error in [
             ("recipe_sha256", "not-a-sha", "recipe"),
