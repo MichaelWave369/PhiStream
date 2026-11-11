@@ -57,9 +57,11 @@ def _separate(parent: Path, *roots: Path) -> None:
 def _path_ok(relative: str, project: str) -> bool:
     if type(relative) is not str or "\\" in relative or ":" in relative:
         return False
-    parts = PurePosixPath(relative).parts
-    if not parts or any(p in (".", "..") or
-                        PATH_PART.fullmatch(p) is None for p in parts):
+    normalized = PurePosixPath(relative)
+    parts = normalized.parts
+    if (relative != normalized.as_posix() or not parts or
+            any(p in (".", "..") or PATH_PART.fullmatch(p) is None
+                for p in parts)):
         return False
     if len(parts) == 1:
         return parts[0] in (project + ".uproject", "PHI_MCP_DISPOSABLE.json")
