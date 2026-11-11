@@ -124,9 +124,6 @@ class R06EvidenceTests(unittest.TestCase):
         self.assertFalse(report["actor_existence_verified"])
         self.assertFalse(report["saved_ue_map_semantics_verified"])
         self.assertFalse(report["in_memory_world_state_verified"])
-        self.assertEqual([item["kind"] for item in report["changes"]],
-                         ["missing", "added", "modified"] if False else
-                         [item["kind"] for item in report["changes"]])
         self.assertEqual(
             {item["path"]: item["kind"] for item in report["changes"]},
             {"Config/DefaultEngine.ini": "missing",
