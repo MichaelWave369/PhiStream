@@ -549,3 +549,15 @@ manual-only, and wholly absent from PR tests.
 ## Φ Nine Mind R0.6 · Cache-Only Specialist Prompt Evaluation
 
 The [Nine Mind prompted runner](docs/NINE_MIND_PROMPT_RUNNER_R06.md) fills the middle arm of the existing [blind comparison](docs/NINE_MIND_BLIND_BENCH_R05.md): unchanged base, same base with a reviewed method prompt, and eventually a genuinely trained adapter. Its default command is an **offline preflight only**. Actual local 4-bit Qwen3 inference requires a fully human-reviewed private Forge dataset, two explicit approval switches, the exact cached model revision, and a new private output path outside Git. It neither downloads model weights nor changes Vessie/GA108 routing or trains adapters. No physical model run is claimed by CI.
+
+## Φ Neural Tiny Pilot (optional educational training)
+
+An original, offline byte-level causal Transformer provides a tiny CPU-first training smoke test, fixed held-out bits-per-byte evaluator, SHA-bound local plan, and a handoff to PhiRepoNerve's Neural Research Bridge. **Explicit `--approve-training` required.** No model downloads, pretrained weights, unattended training, automatic code edits, checkpoint exports or production claims.
+
+```bash
+python -m phistream.neural_tiny preflight --data examples/demo-phi-bytes.txt --context 16
+# Explicit training only, with output outside the Git checkout:
+python -m phistream.neural_tiny train --data examples/demo-phi-bytes.txt --out-dir ~/phi-neural-runs/baseline --approve-training --device cpu --steps 12
+```
+
+See [Neural Tiny Pilot R1](docs/NEURAL_TINY_PILOT_R1.md) for GPU caveats, integrity receipts, local-only safety limits, and the RepoNerve handoff. The supplied example dataset is synthetic/repetitive and its loss is **not** evidence of a useful model.
